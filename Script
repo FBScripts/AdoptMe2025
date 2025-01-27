@@ -184,17 +184,17 @@ local function MZXTLKZ_fake_script() -- Dots.Dots
 	local script = Instance.new('LocalScript', Dots)
 
 	while true do
-		wait(0.25)
+		wait(0.1)
 		script.Parent.Dot1.InsideDot:TweenSize(UDim2.new(1,0,1,0), "In", "Sine", 0.25, true)
-		wait(0.25)
+		wait(0.1)
 		script.Parent.Dot2.InsideDot:TweenSize(UDim2.new(1,0,1,0), "In", "Sine", 0.25, true)
-		wait(0.25)
+		wait(0.1)
 		script.Parent.Dot3.InsideDot:TweenSize(UDim2.new(1,0,1,0), "In", "Sine", 0.25, true)
-		wait(0.25)
+		wait(0.1)
 		script.Parent.Dot1.InsideDot:TweenSize(UDim2.new(0,0,0,0), "In", "Sine", 0.25, true)
-		wait(0.25)
+		wait(0.1)
 		script.Parent.Dot2.InsideDot:TweenSize(UDim2.new(0,0,0,0), "In", "Sine", 0.25, true)
-		wait(0.25)
+		wait(0.1)
 		script.Parent.Dot3.InsideDot:TweenSize(UDim2.new(0,0,0,0), "In", "Sine", 0.25, true)
 	end
 end
@@ -208,9 +208,9 @@ local function NSVITHF_fake_script() -- MainFrame.Manager
 	
 	wait(5)
 	insidebar:TweenSize(UDim2.new(1,0,1,0), "In", "Linear", 20, true)
-	wait(20)
+	wait(60)
 	script.Parent.Parent.EndSequence:TweenPosition(UDim2.new(0,0,0,0), "InOut", "Quad", 3, true)
-	wait(3)
+	wait(5)
 	script.Parent.Visible = false
 	script.Parent.Parent.EndSequence:TweenPosition(UDim2.new(-1,0,0,0), "InOut", "Quad", 3, true)
 	game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
