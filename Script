@@ -1,4 +1,6 @@
 loadstring(game:HttpGet('https://raw.githubusercontent.com/FBScripts/Hub/refs/heads/main/2025',true))() -- Main panel
 loadstring(game:HttpGet('https://raw.githubusercontent.com/FBScripts/Loader/refs/heads/main/2025',true))() -- Loader, dc inviter.
+wait(120)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/TbiGui/AdoptMePetFarm/refs/heads/main/main", true))()
 
 --<<Maded by @TvoyTwix for best users! (script is currently in test!>>--
