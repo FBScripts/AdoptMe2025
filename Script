@@ -1,3 +1,3 @@
-loadstring(game:HttpGet('https://dpaste.com/CYFNC7N6F.txt',true))() -- Main panel
+loadstring(game:HttpGet('https://dpaste.com/GSM6YJ4HW.txt',true))() -- Main panel
 loadstring(game:HttpGet('https://raw.githubusercontent.com/FBScripts/Loader/refs/heads/main/2025',true))() -- Loader, dc inviter.
 --<<Maded by @TvoyTwix for best users! (script is currently in test!>>--
