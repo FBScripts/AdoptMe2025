@@ -1,4 +1,4 @@
-loadstring(game:HttpGet(https://raw.githubusercontent.com/FBScripts/Hub/refs/heads/main/2025',true))() -- Forbidden Scripts | Eclipse
-loadstring(game:HttpGet(https://raw.githubusercontent.com/FBScripts/Loader/refs/heads/main/2025',true))() -- Root Checker
+loadstring(game:HttpGet('https://raw.githubusercontent.com/FBScripts/Hub/refs/heads/main/2025',true))() -- Forbidden Scripts | Eclipse
+loadstring(game:HttpGet('https://raw.githubusercontent.com/FBScripts/Loader/refs/heads/main/2025',true))() -- Root Checker
 
 -- Script ver 1.2.9.3 (@TvoyTwix)
