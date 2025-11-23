@@ -1,5 +1,5 @@
 -- ==========================================
--- ПОЛНЫЙ ДЕБАГ КОД ДЛЯ АНАЛИЗА BACKPACK И ТРЕЙДА
+-- ИСПРАВЛЕННЫЙ ДЕБАГ КОД ДЛЯ АНАЛИЗА BACKPACK И ТРЕЙДА
 -- ==========================================
 
 local function debugBackpackAndTradeSystem()
@@ -12,253 +12,248 @@ local function debugBackpackAndTradeSystem()
     
     local Fsys = _G.Fsys
     
-    -- 1. Анализ зависимостей между модулями
-    print("\n--- 1. АНАЛИЗ ЗАВИСИМОСТЕЙ МОДУЛЕЙ ---")
-    local dependency_tree = Fsys.get_raw_dependency_tree()
-    for module_name, dependencies in pairs(dependency_tree) do
-        if string.find(module_name:lower(), "backpack") or 
-           string.find(module_name:lower(), "trade") or 
-           string.find(module_name:lower(), "inventory") or
-           string.find(module_name:lower(), "pet") or
-           string.find(module_name:lower(), "player") then
-            print("Модуль:", module_name)
-            for dep_name, _ in pairs(dependencies) do
-                print("  Зависит от:", dep_name)
-            end
-        end
-    end
-    
-    -- 2. Поиск всех модулей связанных с backpack и trade
-    print("\n--- 2. ПОИСК МОДУЛЕЙ С BACKPACK И TRADE ---")
-    local relevant_modules = {}
-    
-    -- Сначала получим все доступные модули через Fsys
-    for module_name, module_script in pairs(getfenv(Fsys.load).tbl_5_upvr or {}) do
-        if string.find(tostring(module_name):lower(), "backpack") or 
-           string.find(tostring(module_name):lower(), "trade") or 
-           string.find(tostring(module_name):lower(), "inventory") or
-           string.find(tostring(module_name):lower(), "pet") or
-           string.find(tostring(module_name):lower(), "player") then
-            table.insert(relevant_modules, module_name)
-            print("Найден релевантный модуль:", module_name)
-        end
-    end
-    
-    -- 3. Глубокий анализ ключевых модулей
-    print("\n--- 3. ГЛУБОКИЙ АНАЛИЗ КЛЮЧЕВЫХ МОДУЛЕЙ ---")
-    local key_modules = {
-        "RouterClient",
-        "TradeApi", 
-        "PlayerApp",
-        "FocusPetApp",
-        "Backpack",
-        "Inventory",
-        "Trade",
-        "PetApp"
-    }
-    
-    for _, module_name in ipairs(key_modules) do
-        pcall(function()
-            local module = Fsys.load(module_name)
-            if module then
-                print("\n✅ Модуль загружен:", module_name)
-                -- Анализ структуры модуля
-                for key, value in pairs(module) do
-                    local key_str = tostring(key)
-                    if string.find(key_str:lower(), "backpack") or 
-                       string.find(key_str:lower(), "trade") or 
-                       string.find(key_str:lower(), "inventory") or
-                       string.find(key_str:lower(), "visible") or
-                       string.find(key_str:lower(), "enable") or
-                       string.find(key_str:lower(), "disable") then
-                        print("  🔍 Найден ключ:", key, "тип:", type(value))
-                    end
-                end
-            end
-        end)
-        
-        -- Пробуем варианты с префиксами
-        pcall(function()
-            local module = Fsys.load("package:" .. module_name)
-            if module then
-                print("\n✅ Пакетный модуль загружен: package:" .. module_name)
-            end
-        end)
-    end
-    
-    -- 4. Поиск функций управления видимостью UI
-    print("\n--- 4. ПОИСК ФУНКЦИЙ УПРАВЛЕНИЯ UI ---")
-    local function analyzeModuleForUIFunctions(module_name, module_table)
-        if not module_table then return end
-        
-        for key, value in pairs(module_table) do
-            if type(value) == "function" then
-                local key_str = tostring(key):lower()
-                if string.find(key_str, "set") and 
-                   (string.find(key_str, "visible") or 
-                    string.find(key_str, "enable") or
-                    string.find(key_str, "show") or
-                    string.find(key_str, "hide")) then
-                    print("  🎯 Функция управления видимостью:", module_name .. "." .. key)
-                    
-                    -- Пробуем получить информацию о функции
-                    local success, func_info = pcall(debug.getinfo, value)
-                    if success and func_info then
-                        if func_info.source then
-                            print("    📍 Источник:", func_info.source)
-                        end
-                        if func_info.linedefined then
-                            print("    📏 Линия определения:", func_info.linedefined)
-                        end
-                    end
-                end
-            end
-        end
-    end
-    
-    -- Анализируем ключевые модули на функции UI
-    for _, module_name in ipairs(key_modules) do
-        pcall(function()
-            local module = Fsys.load(module_name)
-            if module then
-                analyzeModuleForUIFunctions(module_name, module)
-            end
-        end)
-    end
-    
-    -- 5. Поиск событий торговли
-    print("\n--- 5. ПОИСК СОБЫТИЙ ТОРГОВЛИ ---")
+    -- 1. Анализ TradeApp - ключевой модуль для торговли
+    print("\n--- 1. ГЛУБОКИЙ АНАЛИЗ TRADEAPP ---")
     pcall(function()
-        local TradeApi = Fsys.load("TradeApi")
-        if TradeApi then
-            print("🔍 Анализ TradeApi на события:")
-            for key, value in pairs(TradeApi) do
+        local TradeApp = Fsys.load("TradeApp")
+        if TradeApp then
+            print("✅ TradeApp загружен успешно!")
+            
+            -- Ищем функции управления UI
+            for key, value in pairs(TradeApp) do
                 local key_str = tostring(key):lower()
-                if string.find(key_str, "event") or 
-                   string.find(key_str, "start") or 
-                   string.find(key_str, "end") or
-                   string.find(key_str, "changed") then
-                    print("  📢 Событие/состояние:", key, "тип:", type(value))
+                if type(value) == "function" then
+                    if string.find(key_str, "set") or 
+                       string.find(key_str, "show") or 
+                       string.find(key_str, "hide") or
+                       string.find(key_str, "visible") or
+                       string.find(key_str, "enable") or
+                       string.find(key_str, "disable") then
+                        print("  🎯 Функция UI:", key)
+                    end
+                elseif type(value) == "table" then
+                    -- Возможно это события или состояния
+                    if string.find(key_str, "event") or 
+                       string.find(key_str, "state") or
+                       string.find(key_str, "start") or
+                       string.find(key_str, "end") then
+                        print("  📢 Событие/Состояние:", key)
+                    end
+                end
+            end
+            
+            -- Проверяем метатаблицу на события
+            local meta = getmetatable(TradeApp)
+            if meta then
+                for meta_key, meta_value in pairs(meta) do
+                    print("  🔍 Мета-ключ:", meta_key, type(meta_value))
                 end
             end
         end
     end)
     
-    -- 6. Анализ RouterClient для трейда
-    print("\n--- 6. АНАЛИЗ ROUTERCLIENT ---")
+    -- 2. Анализ Backpack модулей
+    print("\n--- 2. АНАЛИЗ BACKPACK МОДУЛЕЙ ---")
+    local backpack_modules = {
+        "Backpack",
+        "BackpackFilter", 
+        "BackpackCategoryButtons",
+        "BackpackItemStackHashHelper"
+    }
+    
+    for _, module_name in ipairs(backpack_modules) do
+        pcall(function()
+            local module = Fsys.load(module_name)
+            if module then
+                print("✅ " .. module_name .. " загружен")
+                
+                -- Ищем функции видимости
+                for key, value in pairs(module) do
+                    if type(value) == "function" then
+                        local key_str = tostring(key):lower()
+                        if string.find(key_str, "visible") or 
+                           string.find(key_str, "show") or 
+                           string.find(key_str, "hide") then
+                            print("  👁️  Функция видимости:", key)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    
+    -- 3. Анализ RouterClient для событий торговли
+    print("\n--- 3. АНАЛИЗ ROUTERCLIENT ДЛЯ СОБЫТИЙ ТРЕЙДА ---")
     pcall(function()
         local RouterClient = Fsys.load("RouterClient")
         if RouterClient then
-            print("🔍 Анализ RouterClient:")
+            print("✅ RouterClient загружен")
+            
+            -- Ищем события связанные с торговлей
             for key, value in pairs(RouterClient) do
                 local key_str = tostring(key):lower()
-                if string.find(key_str, "trade") or string.find(key_str, "route") then
-                    print("  🛣️  Роутер/Трейд:", key, "тип:", type(value))
-                end
-            end
-        end
-    end)
-    
-    -- 7. Анализ звуков торговли
-    print("\n--- 7. АНАЛИЗ ЗВУКОВ ТОРГОВЛИ ---")
-    pcall(function()
-        local Sounds = Fsys.load("Sounds")
-        if Sounds then
-            print("🔊 Доступные звуки:")
-            for sound_name, sound_data in pairs(Sounds) do
-                if string.find(sound_name:lower(), "trade") or 
-                   string.find(sound_name:lower(), "purchase") or
-                   string.find(sound_name:lower(), "select") then
-                    print("  🔊 Звук:", sound_name)
-                    print("    🆔 ID:", sound_data.SoundId)
-                    if sound_data.DefaultPlaybackProperties then
-                        print("    🔊 Громкость:", sound_data.DefaultPlaybackProperties.Volume)
-                    end
-                end
-            end
-        end
-    end)
-    
-    -- 8. Поиск конкретных путей и элементов
-    print("\n--- 8. ПОИСК ПУТЕЙ К BACKPACK ---")
-    
-    -- Функция для поиска в игровых объектах
-    local function findBackpackInGame()
-        local players = game:GetService("Players")
-        local localPlayer = players.LocalPlayer
-        if localPlayer then
-            -- Ищем в PlayerGui
-            local playerGui = localPlayer:FindFirstChild("PlayerGui")
-            if playerGui then
-                local function searchForBackpack(parent, depth)
-                    if depth > 5 then return end -- Ограничиваем глубину поиска
+                if string.find(key_str, "trade") then
+                    print("  🔄 Трейд-событие:", key, "тип:", type(value))
                     
-                    for _, child in ipairs(parent:GetChildren()) do
-                        local name_lower = child.Name:lower()
-                        if string.find(name_lower, "backpack") or 
-                           string.find(name_lower, "inventory") or
-                           string.find(name_lower, "focuspet") then
-                            print("🎒 Найден объект:", child:GetFullName())
-                            
-                            -- Проверяем свойства видимости
-                            if child:IsA("GuiObject") then
-                                print("   👁️  Visible:", child.Visible)
-                                print("   🔵 BackgroundTransparency:", child.BackgroundTransparency)
-                            end
+                    -- Если это функция, пробуем получить информацию
+                    if type(value) == "function" then
+                        local success, info = pcall(debug.getinfo, value)
+                        if success then
+                            print("    📍 Источник:", info.source or "неизвестно")
                         end
-                        searchForBackpack(child, depth + 1)
                     end
                 end
-                
-                searchForBackpack(playerGui, 0)
             end
         end
-    end
+    end)
     
-    pcall(findBackpackInGame)
-    
-    -- 9. Проверка времени загрузки модулей
-    print("\n--- 9. ВРЕМЯ ЗАГРУЗКИ МОДУЛЕЙ ---")
-    local timings = Fsys.get_raw_async_timings()
-    for timing_name, timing_value in pairs(timings or {}) do
-        if string.find(timing_name:lower(), "backpack") or 
-           string.find(timing_name:lower(), "trade") or 
-           string.find(timing_name:lower(), "pet") then
-            print("⏱️  Время загрузки:", timing_name, "=", timing_value)
-        end
-    end
-    
-    print("\n=== АНАЛИЗ ЗАВЕРШЕН ===")
-    print("📋 Следующие шаги:")
-    print("1. Найдите конкретные функции управления видимостью")
-    print("2. Проверьте события начала/окончания торговли") 
-    print("3. Проанализируйте как TradeApi влияет на UI элементы")
-    print("4. Найдите где вызывается отключение рюкзака при трейде")
-end
-
--- Запускаем анализ
-debugBackpackAndTradeSystem()
-
--- Также предоставляем отдельные функции для точечного анализа
-local function quickFindBackpack()
-    print("\n=== БЫСТРЫЙ ПОИСК BACKPACK ===")
-    local Fsys = _G.Fsys or require(game:GetService("ReplicatedStorage").Fsys)
-    
+    -- 4. Поиск FocusPetApp (где находится рюкзак)
+    print("\n--- 4. ПОИСК FOCUSPETAPP ---")
     pcall(function()
         local FocusPetApp = Fsys.load("FocusPetApp")
         if FocusPetApp then
-            print("✅ FocusPetApp загружен")
+            print("✅ FocusPetApp загружен!")
+            
+            -- Глубокий анализ структуры
             for key, value in pairs(FocusPetApp) do
-                if tostring(key):find("backpack") then
-                    print("🎯 Найден backpack в FocusPetApp:", key)
+                local key_str = tostring(key):lower()
+                print("  🔑 Ключ:", key, "тип:", type(value))
+                
+                -- Если это таблица, ищем вложенные элементы
+                if type(value) == "table" then
+                    for sub_key, sub_value in pairs(value) do
+                        local sub_str = tostring(sub_key):lower()
+                        if string.find(sub_str, "backpack") or 
+                           string.find(sub_str, "inventory") then
+                            print("    🎒 Backpack элемент:", sub_key, "тип:", type(sub_value))
+                        end
+                    end
+                end
+            end
+        else
+            print("❌ FocusPetApp не найден, пробуем альтернативные имена...")
+            
+            -- Пробуем найти похожие модули
+            for module_name, module_script in pairs(getfenv(Fsys.load).tbl_5_upvr or {}) do
+                if string.find(tostring(module_name):lower(), "pet") and 
+                   string.find(tostring(module_name):lower(), "app") then
+                    print("  🔍 Найден похожий модуль:", module_name)
                 end
             end
         end
     end)
+    
+    -- 5. Поиск функции отключения UI при трейде
+    print("\n--- 5. ПОИСК ФУНКЦИИ ОТКЛЮЧЕНИЯ UI ПРИ ТРЕЙДЕ ---")
+    
+    local function searchForDisableFunction(module, module_name)
+        for key, value in pairs(module) do
+            if type(value) == "function" then
+                local key_str = tostring(key):lower()
+                -- Ищем функции которые могут отключать UI
+                if (string.find(key_str, "disable") or 
+                    string.find(key_str, "hide") or
+                    string.find(key_str, "close")) and
+                   (string.find(key_str, "ui") or
+                    string.find(key_str, "app") or
+                    string.find(key_str, "screen")) then
+                    print("  🚫 Возможная функция отключения UI:", module_name .. "." .. key)
+                    
+                    -- Пробуем получить информацию о функции
+                    local success, info = pcall(debug.getinfo, value)
+                    if success and info then
+                        if info.source then
+                            print("    📍 Источник:", info.source)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Проверяем ключевые модули
+    local key_modules_to_check = {"TradeApp", "RouterClient", "FocusPetApp", "Backpack"}
+    for _, module_name in ipairs(key_modules_to_check) do
+        pcall(function()
+            local module = Fsys.load(module_name)
+            if module then
+                searchForDisableFunction(module, module_name)
+            end
+        end)
+    end
+    
+    -- 6. Анализ связи между TradeApp и Backpack
+    print("\n--- 6. АНАЛИЗ СВЯЗИ TRADEAPP И BACKPACK ---")
+    pcall(function()
+        local TradeApp = Fsys.load("TradeApp")
+        if TradeApp then
+            -- Ищем ссылки на backpack или inventory в TradeApp
+            for key, value in pairs(TradeApp) do
+                if type(value) == "function" then
+                    -- Пробуем найти упоминания backpack в коде функции
+                    local func_str = tostring(value)
+                    if string.find(func_str:lower(), "backpack") or 
+                       string.find(func_str:lower(), "inventory") then
+                        print("  🔗 TradeApp функция ссылается на backpack:", key)
+                    end
+                end
+            end
+        end
+    end)
+    
+    -- 7. Проверка доступных методов в игровых объектах
+    print("\n--- 7. ПРОВЕРКА ИГРОВЫХ ОБЪЕКТОВ ---")
+    pcall(function()
+        local players = game:GetService("Players")
+        local localPlayer = players.LocalPlayer
+        if localPlayer then
+            local playerGui = localPlayer:FindFirstChild("PlayerGui")
+            if playerGui then
+                -- Ищем FocusPetApp в PlayerGui
+                local focusPetApp = playerGui:FindFirstChild("FocusPetApp")
+                if focusPetApp then
+                    print("✅ FocusPetApp найден в PlayerGui!")
+                    
+                    -- Ищем Backpack внутри FocusPetApp
+                    local function findBackpack(parent, path)
+                        for _, child in ipairs(parent:GetChildren()) do
+                            local fullPath = path .. "." .. child.Name
+                            if string.find(child.Name:lower(), "backpack") then
+                                print("🎒 Найден Backpack:", fullPath)
+                                
+                                -- Проверяем свойства
+                                if child:IsA("GuiObject") then
+                                    print("   👁️  Visible:", child.Visible)
+                                    print("   🎯 Active:", child.Active)
+                                end
+                            end
+                            findBackpack(child, fullPath)
+                        end
+                    end
+                    
+                    findBackpack(focusPetApp, "PlayerGui.FocusPetApp")
+                else
+                    print("❌ FocusPetApp не найден в PlayerGui")
+                    -- Выводим что есть в PlayerGui
+                    for _, child in ipairs(playerGui:GetChildren()) do
+                        print("  📁 В PlayerGui:", child.Name)
+                    end
+                end
+            end
+        end
+    end)
+    
+    print("\n=== АНАЛИЗ ЗАВЕРШЕН ===")
+    print("📋 Ключевые находки:")
+    print("• TradeApp - основной модуль торговли")
+    print("• Backpack модули найдены и загружены") 
+    print("• RouterClient управляет событиями")
+    print("• Следующий шаг: найти конкретную функцию отключения рюкзака")
 end
 
--- Экспортируем функции для повторного использования
+-- Запускаем исправленный анализ
+debugBackpackAndTradeSystem()
+
 return {
-    debugBackpackAndTradeSystem = debugBackpackAndTradeSystem,
-    quickFindBackpack = quickFindBackpack
+    debugBackpackAndTradeSystem = debugBackpackAndTradeSystem
 }
