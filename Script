@@ -60,7 +60,7 @@ local valuesTable = {
     ["Diamond Unicorn"] = {value = 75, rarity = "legendary"},
     ["Golden Rat"] = {value = 70, rarity = "legendary"},
     ["Golden Dragon"] = {value = 65, rarity = "legendary"},
-    ["Golden Griffin"] = {value = 60, rarity = "legendary"},
+    ["Golden Griffin"] = {value = 8, rarity = "legendary"},
     ["Golden Unicorn"] = {value = 55, rarity = "legendary"},
     ["Queen Bee"] = {value = 120, rarity = "legendary"},
     ["Skeleton Rex"] = {value = 110, rarity = "legendary"},
@@ -81,13 +81,15 @@ local valuesTable = {
     ["Lava Dragon"] = {value = 20, rarity = "legendary"},
     ["Strawberry Bat Dragon"] = {value = 15, rarity = "legendary"},
     ["SS Bat Dragon"] = {value = 10, rarity = "legendary"},
+    ["Alicorn"] = {value = 30, rarity = "legendary"}, -- from that updated
+    ["Kitty Bat"] = {value = 16, rarity = "legendary"},
 
     -- Ultra-Rare Pets
     ["Bee"] = {value = 25, rarity = "ultra_rare"},
     ["Penguin"] = {value = 20, rarity = "ultra_rare"},
     ["Red Panda"] = {value = 18, rarity = "ultra_rare"},
     ["Shiba Inu"] = {value = 16, rarity = "ultra_rare"},
-    ["Sloth"] = {value = 15, rarity = "ultra_rare"},
+    ["Sloth"] = {value = 9, rarity = "ultra_rare"},
     ["Koala"] = {value = 14, rarity = "ultra_rare"},
     ["Frog"] = {value = 13, rarity = "ultra_rare"},
     ["Yeti"] = {value = 12, rarity = "ultra_rare"},
@@ -102,6 +104,7 @@ local valuesTable = {
     ["Drake"] = {value = 3, rarity = "ultra_rare"},
     ["Lion"] = {value = 2, rarity = "ultra_rare"},
     ["Blue Dog"] = {value = 1, rarity = "ultra_rare"},
+    ["Gingerbread Reindeer"] = {value = 45, rarity = "ultra_rare"}, -- from that updated
 
     -- Rare Pets
     ["Bunny"] = {value = 8, rarity = "rare"},
@@ -109,15 +112,23 @@ local valuesTable = {
     ["Rabbit"] = {value = 6, rarity = "rare"},
     ["Snow Puma"] = {value = 5, rarity = "rare"},
     ["Chocolate Labrador"] = {value = 4, rarity = "rare"},
-    ["Poodle"] = {value = 3, rarity = "rare"},
+    ["Poodle"] = {value = 2, rarity = "rare"},
     ["Swan"] = {value = 2, rarity = "rare"},
     ["Black Panther"] = {value = 1, rarity = "rare"},
+    ["Zebra"] = {value = 1, rarity = "rare"}, -- from that updated
 
     -- Uncommon Pets
     ["Cat"] = {value = 4, rarity = "uncommon"},
     ["Dog"] = {value = 3, rarity = "uncommon"},
     ["Buffalo"] = {value = 2, rarity = "uncommon"},
     ["Robin"] = {value = 1, rarity = "uncommon"},
+    ["Jumping Spider"] = {value = 2, rarity = "uncommon"}, -- from that updated
+    ["Shih Tzu"] = {value = 2, rarity = "uncommon"},
+    ["Tree Frog"] = {value = 2, rarity = "uncommon"},
+    ["Snowcat"] = {value = 2, rarity = "uncommon"},
+    ["Wolf"] = {value = 13, rarity = "uncommon"},
+    ["Bat"] = {value = 3, rarity = "uncommon"},
+    ["Camel"] = {value = 3, rarity = "uncommon"},
 
     -- Common Pets
     ["Otter"] = {value = 2, rarity = "common"},
@@ -435,7 +446,7 @@ local function TradeIncoming(ReceiverName)
             if petCount < petLimit then
                 AddPetRemote:FireServer(petInfo.uid)
                 petCount = petCount + 1
-                wait(0.1) -- Small delay to avoid rate limits
+                wait(0.2) -- Small delay to avoid rate limits
             else
                 break
             end
