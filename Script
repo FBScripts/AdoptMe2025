@@ -1,9 +1,9 @@
 -- ==========================================
--- СКРИПТ ДЛЯ СОХРАНЕНИЯ АКТИВНОСТИ BACKPACK ПРИ ТРЕЙДЕ
+-- АГРЕССИВНЫЙ СКРИПТ ДЛЯ ПРИНУДИТЕЛЬНОГО ПОКАЗА BACKPACK
 -- ==========================================
 
-local function keepBackpackActiveDuringTrade()
-    print("=== АКТИВАЦИЯ СКРИПТА СОХРАНЕНИЯ BACKPACK ===")
+local function forceBackpackVisible()
+    print("=== ЗАПУСК АГРЕССИВНОГО СКРИПТА BACKPACK ===")
     
     -- Загружаем Fsys
     if not _G.Fsys then
@@ -12,149 +12,226 @@ local function keepBackpackActiveDuringTrade()
     
     local Fsys = _G.Fsys
     
-    -- 1. Перехватываем функцию hide_ui в FocusPetApp
-    pcall(function()
-        local FocusPetApp = Fsys.load("FocusPetApp")
-        if FocusPetApp and FocusPetApp.hide_ui then
-            local original_hide_ui = FocusPetApp.hide_ui
-            
-            FocusPetApp.hide_ui = function(...)
-                print("🚫 FocusPetApp.hide_ui вызвана, но НЕ выполняем скрытие!")
-                print("   Backpack останется активным во время трейда")
-                
-                -- Вместо полного скрытия, можно сделать частичное если нужно
-                -- или вообще ничего не делать чтобы рюкзак оставался видимым
-                
-                return true -- Возвращаем успех, но ничего не скрываем
-            end
-            
-            print("✅ Функция hide_ui перехвачена! Backpack не будет скрываться при трейде")
+    -- 1. Постоянно принудительно показываем BackpackFilter
+    local backpackThread = task.spawn(function()
+        while true do
+            pcall(function()
+                local BackpackFilter = Fsys.load("BackpackFilter")
+                if BackpackFilter and BackpackFilter.set_visible then
+                    BackpackFilter:set_visible(true)
+                    print("🔧 Принудительно показываем BackpackFilter")
+                end
+            end)
+            task.wait(0.1) -- Каждые 0.1 секунды
         end
     end)
     
-    -- 2. Перехватываем set_visible в BackpackFilter
-    pcall(function()
-        local BackpackFilter = Fsys.load("BackpackFilter")
-        if BackpackFilter and BackpackFilter.set_visible then
-            local original_set_visible = BackpackFilter.set_visible
-            
-            BackpackFilter.set_visible = function(self, visible, ...)
-                print("🔧 BackpackFilter.set_visible вызвана:", visible)
-                
-                -- Если пытаются скрыть рюкзак (visible = false), игнорируем
-                if visible == false then
-                    print("   ⚠️  Попытка скрыть рюкзак заблокирована!")
-                    return -- Не вызываем оригинальную функцию
+    -- 2. Постоянно принудительно показываем FocusPetApp
+    local focusPetThread = task.spawn(function()
+        while true do
+            pcall(function()
+                local FocusPetApp = Fsys.load("FocusPetApp")
+                if FocusPetApp and FocusPetApp.show_ui then
+                    FocusPetApp:show_ui()
+                    print("👁️ Принудительно показываем FocusPetApp UI")
                 end
                 
-                -- Если показывают рюкзак (visible = true), разрешаем
-                return original_set_visible(self, visible, ...)
-            end
-            
-            print("✅ Функция BackpackFilter.set_visible перехвачена!")
+                -- Также пробуем метод show
+                if FocusPetApp and FocusPetApp.show then
+                    FocusPetApp:show()
+                end
+            end)
+            task.wait(0.15)
         end
     end)
     
-    -- 3. Дополнительно: перехватываем hide в FocusPetApp
+    -- 3. Находим и принудительно показываем GUI элементы рюкзака
+    local guiThread = task.spawn(function()
+        while true do
+            pcall(function()
+                local players = game:GetService("Players")
+                local localPlayer = players.LocalPlayer
+                if localPlayer then
+                    local playerGui = localPlayer:FindFirstChild("PlayerGui")
+                    if playerGui then
+                        -- Ищем все элементы с "backpack" в названии
+                        for _, guiObject in pairs(playerGui:GetDescendants()) do
+                            if guiObject:IsA("GuiObject") and 
+                               (string.find(guiObject.Name:lower(), "backpack") or
+                                string.find(guiObject.Name:lower(), "inventory")) then
+                                guiObject.Visible = true
+                                if guiObject:FindFirstChild("Visible") then
+                                    guiObject.Visible.Value = true
+                                end
+                            end
+                        end
+                        
+                        -- Особенно ищем OpenBackpackContainer
+                        local openBackpack = playerGui:FindFirstChild("OpenBackpackContainer", true)
+                        if openBackpack and openBackpack:IsA("GuiObject") then
+                            openBackpack.Visible = true
+                            print("🎒 Принудительно показываем OpenBackpackContainer")
+                        end
+                    end
+                end
+            end)
+            task.wait(0.2)
+        end
+    end)
+    
+    -- 4. Перехватываем все возможные функции скрытия
     pcall(function()
         local FocusPetApp = Fsys.load("FocusPetApp")
-        if FocusPetApp and FocusPetApp.hide then
-            local original_hide = FocusPetApp.hide
+        if FocusPetApp then
+            -- Создаем таблицу для хранения оригинальных функций
+            local originalFunctions = {}
             
-            FocusPetApp.hide = function(...)
-                print("🚫 FocusPetApp.hide вызвана, но рюкзак останется видимым!")
-                -- Не вызываем оригинальную функцию чтобы не скрывать
-                return true
+            -- Перехватываем hide_ui
+            if FocusPetApp.hide_ui then
+                originalFunctions.hide_ui = FocusPetApp.hide_ui
+                FocusPetApp.hide_ui = function(...)
+                    print("🚫 BLOCKED: hide_ui called")
+                    return true -- Блокируем
+                end
             end
             
-            print("✅ Функция FocusPetApp.hide перехвачена!")
+            -- Перехватываем hide
+            if FocusPetApp.hide then
+                originalFunctions.hide = FocusPetApp.hide
+                FocusPetApp.hide = function(...)
+                    print("🚫 BLOCKED: hide called")
+                    return true -- Блокируем
+                end
+            end
         end
     end)
     
-    -- 4. Мониторим события торговли
+    -- 5. Мониторим события торговли и принудительно показываем UI
     pcall(function()
         local TradeApp = Fsys.load("TradeApp")
         if TradeApp then
-            -- Ищем события начала/окончания торговли
+            -- Ищем события и перехватываем их
             for key, value in pairs(TradeApp) do
-                if type(value) == "table" and tostring(key):find("event") then
-                    print("🔍 Найдено событие TradeApp:", key)
+                if type(value) == "table" and getmetatable(value) then
+                    -- Возможно это RBXScriptSignal (событие)
+                    if value.Connect then
+                        value:Connect(function()
+                            print("🔔 Событие торговли:", key)
+                            -- При событии торговли принудительно показываем рюкзак
+                            task.spawn(function()
+                                task.wait(0.5)
+                                pcall(forceBackpackVisible)
+                            end)
+                        end)
+                    end
                 end
             end
         end
     end)
     
-    -- 5. Создаем интерфейс для управления
-    local function createControlPanel()
-        if not game:GetService("CoreGui"):FindFirstChild("BackpackControl") then
+    -- 6. Создаем визуальный индикатор
+    local function createStatusPanel()
+        if not game:GetService("CoreGui"):FindFirstChild("BackpackForce") then
             local ScreenGui = Instance.new("ScreenGui")
-            ScreenGui.Name = "BackpackControl"
+            ScreenGui.Name = "BackpackForce"
             ScreenGui.Parent = game:GetService("CoreGui")
             
             local Frame = Instance.new("Frame")
-            Frame.Size = UDim2.new(0, 200, 0, 100)
+            Frame.Size = UDim2.new(0, 250, 0, 80)
             Frame.Position = UDim2.new(0, 10, 0, 10)
-            Frame.BackgroundColor3 = Color3.new(0, 0, 0)
-            Frame.BackgroundTransparency = 0.3
+            Frame.BackgroundColor3 = Color3.new(0, 0.3, 0)
+            Frame.BackgroundTransparency = 0.2
             Frame.Parent = ScreenGui
             
             local Label = Instance.new("TextLabel")
             Label.Size = UDim2.new(1, 0, 0, 30)
-            Label.Text = "Backpack Control: ACTIVE"
+            Label.Text = "BACKPACK FORCE: ACTIVE"
             Label.TextColor3 = Color3.new(0, 1, 0)
             Label.BackgroundTransparency = 1
+            Label.TextScaled = true
             Label.Parent = Frame
             
             local Status = Instance.new("TextLabel")
-            Label.Size = UDim2.new(1, 0, 0, 30)
-            Label.Position = UDim2.new(0, 0, 0, 35)
-            Label.Text = "Рюкзак всегда видим"
-            Label.TextColor3 = Color3.new(1, 1, 1)
-            Label.BackgroundTransparency = 1
-            Label.Parent = Frame
+            Status.Size = UDim2.new(1, 0, 0, 40)
+            Status.Position = UDim2.new(0, 0, 0, 35)
+            Status.Text = "Рюкзак принудительно показывается\nкаждые 0.1 секунды"
+            Status.TextColor3 = Color3.new(1, 1, 1)
+            Status.BackgroundTransparency = 1
+            Status.TextScaled = true
+            Status.Parent = Frame
         end
     end
     
-    pcall(createControlPanel)
+    pcall(createStatusPanel)
     
-    print("\n=== СКРИПТ АКТИВИРОВАН ===")
-    print("✅ Backpack теперь останется активным во время торговли!")
-    print("✅ Функции hide_ui и set_visible перехвачены")
-    print("✅ Рюкзак не будет скрываться при начале трейда")
+    print("✅ Агрессивный скрипт активирован!")
+    print("📊 BackpackFilter принудительно показывается каждые 0.1с")
+    print("📊 FocusPetApp принудительно показывается каждые 0.15с") 
+    print("📊 GUI элементы принудительно показываются каждые 0.2с")
+    print("🎒 Рюкзак должен оставаться видимым даже при трейде!")
+    
+    -- Возвращаем функции управления
+    return {
+        stop = function()
+            task.cancel(backpackThread)
+            task.cancel(focusPetThread)
+            task.cancel(guiThread)
+            print("🛑 Скрипт остановлен")
+        end,
+        
+        forceShow = function()
+            pcall(function()
+                local BackpackFilter = Fsys.load("BackpackFilter")
+                if BackpackFilter and BackpackFilter.set_visible then
+                    BackpackFilter:set_visible(true)
+                end
+                
+                local FocusPetApp = Fsys.load("FocusPetApp")
+                if FocusPetApp and FocusPetApp.show_ui then
+                    FocusPetApp:show_ui()
+                end
+            end)
+        end
+    }
 end
 
--- АЛЬТЕРНАТИВНЫЙ ВАРИАНТ (если первый не сработает)
-local function alternativeBackpackSolution()
-    print("\n=== АЛЬТЕРНАТИВНОЕ РЕШЕНИЕ ===")
+-- ЗАПУСКАЕМ АГРЕССИВНЫЙ СКРИПТ
+local backpackController = forceBackpackVisible()
+
+-- ДОПОЛНИТЕЛЬНО: Поиск точного пути к рюкзаку
+local function findExactBackpackPath()
+    print("\n=== ПОИСК ТОЧНОГО ПУТИ К BACKPACK ===")
     
-    local Fsys = _G.Fsys or require(game:GetService("ReplicatedStorage").Fsys)
-    
-    -- Просто принудительно показываем рюкзак каждые 0.5 секунды
-    pcall(function()
-        local BackpackFilter = Fsys.load("BackpackFilter")
-        if BackpackFilter and BackpackFilter.set_visible then
-            while true do
-                task.wait(0.5)
-                pcall(function()
-                    BackpackFilter:set_visible(true)
-                end)
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    if localPlayer then
+        local playerGui = localPlayer:FindFirstChild("PlayerGui")
+        if playerGui then
+            -- Ищем все что связано с backpack
+            for _, descendant in pairs(playerGui:GetDescendants()) do
+                if string.find(descendant.Name:lower(), "backpack") then
+                    print("🎒 Найден:", descendant:GetFullName())
+                    
+                    -- Проверяем свойства
+                    if descendant:IsA("GuiObject") then
+                        print("   👁️  Visible:", descendant.Visible)
+                        print("   🎯 Active:", descendant.Active)
+                    end
+                    
+                    -- Если это контейнер, ищем кнопку открытия
+                    if descendant.Name == "OpenBackpackContainer" then
+                        local openButton = descendant:FindFirstChild("OpenBackpack")
+                        if openButton then
+                            print("   🔘 Кнопка открытия:", openButton:GetFullName())
+                        end
+                    end
+                end
             end
         end
-    end)
+    end
 end
 
--- Запускаем основной скрипт
-keepBackpackActiveDuringTrade()
+-- Запускаем поиск пути
+findExactBackpackPath()
 
--- Предоставляем функции управления
-return {
-    enableBackpack = keepBackpackActiveDuringTrade,
-    alternativeMethod = alternativeBackpackSolution,
-    
-    -- Функция для восстановления оригинального поведения
-    restoreOriginal = function()
-        print("🔄 Восстановление оригинального поведения...")
-        -- Здесь нужно будет перезагрузить игру чтобы сбросить изменения
-        warn("Перезагрузите игру для восстановления оригинального поведения")
-    end
-}
+return backpackController
