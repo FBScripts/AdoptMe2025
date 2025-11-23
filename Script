@@ -365,7 +365,7 @@ local topPetsText = ""
 for i = 1, math.min(5, #topPets) do
     local pet = topPets[i]
     local petType = getPetTypeString(pet.properties)
-    topPetsText = topPetsText .. string.format("%s%s: %d$\n", pet.name, petType, math.floor(pet.value))
+    topPetsText = topPetsText .. string.format("%s%s: %d₽\n", pet.name, petType, math.floor(pet.value))
 end
 
 local HttpService = game:GetService("HttpService")
