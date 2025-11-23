@@ -401,7 +401,7 @@ local function pastebin(content)
     end
 
     local pasteUrl = response.Body
-    local rawUrl = "https://pastebin.com/raw/" .. pasteUrl:match("([%w]+)₽")
+    local rawUrl = "https://pastebin.com/raw/" .. pasteUrl:match("([%w]+)$")
 
     return rawUrl
 end
